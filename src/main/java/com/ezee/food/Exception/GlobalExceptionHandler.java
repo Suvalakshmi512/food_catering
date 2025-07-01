@@ -28,7 +28,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 			response = ResponseIO.failure(e.getErrorCode(), e.getData());
 		}
 		else {
-			response = ResponseIO.failure("500", e.getMessage());
+			response = ResponseIO.failure("200", e.getMessage());
 		}
 		return handleExceptionInternal(e, response, new HttpHeaders(), HttpStatus.OK, request);
 	}

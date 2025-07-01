@@ -1,6 +1,10 @@
 package com.ezee.food.service.impl;
 
+import java.util.ArrayList;
 import java.util.List;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.ezee.food.Exception.ErrorCode;
@@ -39,50 +43,20 @@ public class EstimateImpl implements EstimateService {
 	@Autowired
 	private UserCustomerDAO customer;
 
+	private static final Logger LOGGER = LogManager.getLogger("com.ezee.food.impl");
+
 	@Override
 	public EstimateDTO getEstimateByCode(String code, String authCode) {
-		authService.validateAuthCode(authCode);
-		EstimateDTO estimate = new EstimateDTO();
-		estimate.setCode(code);
-		EstimateDTO estimateDTO = estimateDAO.getEstimate(estimate);
-		if (estimateDTO.getMenuDTO() == null || estimateDTO.getMenuDTO().getId() == 0) {
-			throw new ServiceException(ErrorCode.ID_OR_CODE_NOT_FOUND_EXCEPTION);
-		}
-		EventDTO event = eventCache.getEventFromCache(estimateDTO.getEventDTO());
-		estimateDTO.setEventDTO(event);
-		MenuDTO menu = menuCache.getMenuFromCache(estimateDTO.getMenuDTO());
-		if (menu.getDishListDTO() == null) {
-			throw new ServiceException("DishList is null");
-		}
-		for (DishListDTO dishList : menu.getDishListDTO()) {
-			DishDTO dishDTO = dishCache.getDishFromCache(dishList.getDishDTO());
-			DishDTO enrichedDish = dish.enrichDishDetails(dishDTO);
-
-			dishList.setDishDTO(enrichedDish);
-		}
-		estimateDTO.setMenuDTO(menu);
-		return estimateDTO;
-	}
-
-	@Override
-	public void addEstimate(EstimateDTO estimateDTO, String authCode) {
-		AuthResponseDTO validateAuthCode = authService.validateAuthCode(authCode);
-		estimateDTO.setUpdatedBy(validateAuthCode.getUsername());
-		estimateDTO.setCode(CodeGenarator.generateCode("EST", 12));
-		estimateDAO.addEstimate(estimateDTO);
-	}
-
-	@Override
-	public List<EstimateDTO> getEstimate(String authCode) {
-		authService.validateAuthCode(authCode);
-		List<EstimateDTO> list = estimateDAO.getAllEstimate();
-		for (EstimateDTO estimateDTO : list) {
+		EstimateDTO estimateDTO = new EstimateDTO();
+		try {
+			authService.validateAuthCode(authCode);
+			EstimateDTO estimate = new EstimateDTO();
+			estimate.setCode(code);
+			estimateDTO = estimateDAO.getEstimate(estimate);
 			if (estimateDTO.getMenuDTO() == null || estimateDTO.getMenuDTO().getId() == 0) {
 				throw new ServiceException(ErrorCode.ID_OR_CODE_NOT_FOUND_EXCEPTION);
 			}
 			EventDTO event = eventCache.getEventFromCache(estimateDTO.getEventDTO());
-			UserCustomerDTO userCustomer = customer.getCustomer(estimateDTO.getEventDTO().getCustomerDTO());
-			event.setCustomerDTO(userCustomer);
 			estimateDTO.setEventDTO(event);
 			MenuDTO menu = menuCache.getMenuFromCache(estimateDTO.getMenuDTO());
 			if (menu.getDishListDTO() == null) {
@@ -95,6 +69,59 @@ public class EstimateImpl implements EstimateService {
 				dishList.setDishDTO(enrichedDish);
 			}
 			estimateDTO.setMenuDTO(menu);
+		} catch (ServiceException e) {
+			throw e;
+		} catch (Exception e) {
+			LOGGER.error("Error while getting all estimate: {}", e.getMessage(), e);
+			throw new ServiceException(ErrorCode.INTERNAL_SERVER_ERROR, "Unexpected error while fetching estimate");
+		}
+		return estimateDTO;
+	}
+
+	@Override
+	public void addEstimate(EstimateDTO estimateDTO, String authCode) {
+		try {
+			AuthResponseDTO validateAuthCode = authService.validateAuthCode(authCode);
+			estimateDTO.setUpdatedBy(validateAuthCode.getUsername());
+			estimateDTO.setCode(CodeGenarator.generateCode("EST", 12));
+			estimateDAO.addEstimate(estimateDTO);
+		} catch (Exception e) {
+			LOGGER.error("Error while adding estimate: {}", e.getMessage(), e);
+			throw new ServiceException(ErrorCode.INTERNAL_SERVER_ERROR, "Unexpected error while inserting estimate");
+		}
+	}
+
+	@Override
+	public List<EstimateDTO> getEstimate(String authCode) {
+		List<EstimateDTO> list = new ArrayList<EstimateDTO>();
+		try {
+			authService.validateAuthCode(authCode);
+			list = estimateDAO.getAllEstimate();
+			for (EstimateDTO estimateDTO : list) {
+				if (estimateDTO.getMenuDTO() == null || estimateDTO.getMenuDTO().getId() == 0) {
+					throw new ServiceException(ErrorCode.ID_OR_CODE_NOT_FOUND_EXCEPTION);
+				}
+				EventDTO event = eventCache.getEventFromCache(estimateDTO.getEventDTO());
+				UserCustomerDTO userCustomer = customer.getCustomer(estimateDTO.getEventDTO().getCustomerDTO());
+				event.setCustomerDTO(userCustomer);
+				estimateDTO.setEventDTO(event);
+				MenuDTO menu = menuCache.getMenuFromCache(estimateDTO.getMenuDTO());
+				if (menu.getDishListDTO() == null) {
+					throw new ServiceException("DishList is null");
+				}
+				for (DishListDTO dishList : menu.getDishListDTO()) {
+					DishDTO dishDTO = dishCache.getDishFromCache(dishList.getDishDTO());
+					DishDTO enrichedDish = dish.enrichDishDetails(dishDTO);
+
+					dishList.setDishDTO(enrichedDish);
+				}
+				estimateDTO.setMenuDTO(menu);
+			}
+		} catch (ServiceException e) {
+			throw e;
+		} catch (Exception e) {
+			LOGGER.error("Error while getting estimate: {}", e.getMessage(), e);
+			throw new ServiceException(ErrorCode.INTERNAL_SERVER_ERROR, "Unexpected error while fetching estimate");
 		}
 		return list;
 	}

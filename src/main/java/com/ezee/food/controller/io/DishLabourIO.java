@@ -7,8 +7,8 @@ import lombok.EqualsAndHashCode;
 @Data
 @EqualsAndHashCode(callSuper = true)
 public class DishLabourIO extends BaseIO{
-	private LabourIO labourIO;
-	private DishIO dishIO;
+	private LabourIO labour;
+	private DishIO dish;
 	private BigDecimal hoursRequired;
 	private String updatedby;
 	private String updatedAt;

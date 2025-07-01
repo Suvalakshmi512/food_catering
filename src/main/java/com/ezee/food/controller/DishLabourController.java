@@ -36,14 +36,14 @@ public class DishLabourController {
 			dishIO.setTimeToMake(dishLabourDTO.getDishDTO().getTimeToMake());
 			dishIO.setMinAvailableQuantity(dishLabourDTO.getDishDTO().getMinAvailableQuantity());
 			dishIO.setServingSize(dishLabourDTO.getDishDTO().getServingSize());
-			dishLabIO.setDishIO(dishIO);
+			dishLabIO.setDish(dishIO);
 			LabourIO labour = new LabourIO();
 			labour.setCode(dishLabourDTO.getLabourDTO().getCode());
 			labour.setName(dishLabourDTO.getLabourDTO().getName());
 			labour.setRoleName(dishLabourDTO.getLabourDTO().getRoleName());
 			labour.setSpecialization(dishLabourDTO.getLabourDTO().getSpecialization());
 			labour.setHourslySalary(dishLabourDTO.getLabourDTO().getHourslySalary());
-			dishLabIO.setLabourIO(labour);
+			dishLabIO.setLabour(labour);
 			dishLabIO.setHoursRequired(dishLabourDTO.getHoursRequired());
 			dishLabourList.add(dishLabIO);
 		}
@@ -64,14 +64,14 @@ public class DishLabourController {
 		dishIO.setTimeToMake(dishLabourDTO.getDishDTO().getTimeToMake());
 		dishIO.setMinAvailableQuantity(dishLabourDTO.getDishDTO().getMinAvailableQuantity());
 		dishIO.setServingSize(dishLabourDTO.getDishDTO().getServingSize());
-		dishLabIO.setDishIO(dishIO);
+		dishLabIO.setDish(dishIO);
 		LabourIO labour = new LabourIO();
 		labour.setCode(dishLabourByCode.getLabourDTO().getCode());
 		labour.setName(dishLabourByCode.getLabourDTO().getName());
 		labour.setRoleName(dishLabourByCode.getLabourDTO().getRoleName());
 		labour.setSpecialization(dishLabourByCode.getLabourDTO().getSpecialization());
 		labour.setHourslySalary(dishLabourByCode.getLabourDTO().getHourslySalary());
-		dishLabIO.setLabourIO(labour);
+		dishLabIO.setLabour(labour);
 		dishLabIO.setHoursRequired(dishLabourByCode.getHoursRequired());
 		return ResponseIO.success(dishLabIO);
 	}

@@ -11,8 +11,8 @@ import lombok.EqualsAndHashCode;
 @EqualsAndHashCode(callSuper = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class EstimateIO extends BaseIO{
-	private EventIO eventIO;
-	private MenuIO menuIO;
+	private EventIO event;
+	private MenuIO menu;
 	private BigDecimal subTotal;
 	private double discount;
 	private BigDecimal grantTotal;

@@ -45,7 +45,7 @@ public class EventController {
 			customer.setName(event.getCustomerDTO().getName());
 			customer.setMobile(event.getCustomerDTO().getMobile());
 			customer.setEmail(event.getCustomerDTO().getEmail());
-			eventIO.setCustomerIO(customer);
+			eventIO.setCustomer(customer);
 			eventList.add(eventIO);
 		}
 		return ResponseIO.success(eventList);
@@ -67,7 +67,7 @@ public class EventController {
 		customer.setName(eventDTO.getCustomerDTO().getName());
 		customer.setMobile(eventDTO.getCustomerDTO().getMobile());
 		customer.setEmail(eventDTO.getCustomerDTO().getEmail());
-		eventIO.setCustomerIO(customer);
+		eventIO.setCustomer(customer);
 		return ResponseIO.success(eventIO);
 	}
 
@@ -81,7 +81,7 @@ public class EventController {
 		eventDTO.setVenue(eventIO.getVenue());
 		eventDTO.setGuestCount(eventIO.getGuestCount());
 		UserCustomerDTO customer = new UserCustomerDTO();
-		customer.setCode(eventIO.getCustomerIO().getCode());
+		customer.setCode(eventIO.getCustomer().getCode());
 		eventDTO.setCustomerDTO(customer);
 		eventService.addEvent(eventDTO, authcode);
 		return ResponseIO.success("Inserted Successfully");

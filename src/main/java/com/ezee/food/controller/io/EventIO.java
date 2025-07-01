@@ -6,7 +6,7 @@ import lombok.EqualsAndHashCode;
 @Data
 @EqualsAndHashCode(callSuper = true)
 public class EventIO extends BaseIO{
-	private UserCustomerIO customerIO;
+	private UserCustomerIO customer;
 	private String eventDate;
 	private String eventTime;
 	private String venue;

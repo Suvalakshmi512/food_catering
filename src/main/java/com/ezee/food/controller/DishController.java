@@ -102,14 +102,14 @@ public class DishController {
 				IngredientIO ingIOData = new IngredientIO();
 				ingIOData.setCode(dishIngredientDTO.getIngredientDTO().getCode());
 				ingIOData.setName(dishIngredientDTO.getIngredientDTO().getName());
-				ingIO.setIngredientIO(ingIOData);
+				ingIO.setIngredient(ingIOData);
 			}
 			ingIO.setQunatityUsed(dishIngredientDTO.getQunatityUsed());
 			ingIO.setWastage(dishIngredientDTO.getWastage());
 			ingIO.setPrice(dishIngredientDTO.getPrice());
 			dishIngredientIOList.add(ingIO);
 		}
-		dishIO.setDishIngredientIO(dishIngredientIOList);
+		dishIO.setDishIngredient(dishIngredientIOList);
 
 		List<DishLabourIO> dishLabourIOList = new ArrayList<>();
 		for (DishLabourDTO dishLabourDTO : dishDTO.getDishLabourList()) {
@@ -122,12 +122,12 @@ public class DishController {
 				labourIO.setRoleName(dishLabourDTO.getLabourDTO().getRoleName());
 				labourIO.setSpecialization(dishLabourDTO.getLabourDTO().getSpecialization());
 				labourIO.setHourslySalary(dishLabourDTO.getLabourDTO().getHourslySalary());
-				labIO.setLabourIO(labourIO);
+				labIO.setLabour(labourIO);
 			}
 			labIO.setHoursRequired(dishLabourDTO.getHoursRequired());
 			dishLabourIOList.add(labIO);
 		}
-		dishIO.setDishLabourIO(dishLabourIOList);
+		dishIO.setDishLabour(dishLabourIOList);
 
 		return dishIO;
 	}
@@ -150,12 +150,12 @@ public class DishController {
 		}
 
 		List<DishIngredientDTO> ingredientDTOList = new ArrayList<>();
-		if (dishIO.getDishIngredientIO() != null) {
-			for (DishIngredientIO ingIO : dishIO.getDishIngredientIO()) {
+		if (dishIO.getDishIngredient() != null) {
+			for (DishIngredientIO ingIO : dishIO.getDishIngredient()) {
 				DishIngredientDTO ingDTO = new DishIngredientDTO();
-				if (ingIO.getIngredientIO() != null) {
+				if (ingIO.getIngredient() != null) {
 					IngredientDTO ingredientDTO = new IngredientDTO();
-					ingredientDTO.setCode(ingIO.getIngredientIO().getCode());
+					ingredientDTO.setCode(ingIO.getIngredient().getCode());
 					ingDTO.setIngredientDTO(ingredientDTO);
 				}
 				ingDTO.setQunatityUsed(ingIO.getQunatityUsed());
@@ -166,12 +166,12 @@ public class DishController {
 		dishDTO.setDishIngredientList(ingredientDTOList);
 
 		List<DishLabourDTO> labourDTOList = new ArrayList<>();
-		if (dishIO.getDishLabourIO() != null) {
-			for (DishLabourIO labIO : dishIO.getDishLabourIO()) {
+		if (dishIO.getDishLabour() != null) {
+			for (DishLabourIO labIO : dishIO.getDishLabour()) {
 				DishLabourDTO labDTO = new DishLabourDTO();
-				if (labIO.getLabourIO() != null) {
+				if (labIO.getLabour() != null) {
 					LabourDTO labourDTO = new LabourDTO();
-					labourDTO.setCode(labIO.getLabourIO().getCode());
+					labourDTO.setCode(labIO.getLabour().getCode());
 					labDTO.setLabourDTO(labourDTO);
 				}
 				labDTO.setHoursRequired(labIO.getHoursRequired());

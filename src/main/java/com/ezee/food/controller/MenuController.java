@@ -74,11 +74,11 @@ public class MenuController {
 		for (DishListDTO dishListDTO : menuDTO.getDishListDTO()) {
 			DishListIO dishListIO = new DishListIO();
 			dishListIO.setCode(dishListDTO.getCode());
-			dishListIO.setDishIO(convertToDishIO(dishListDTO.getDishDTO()));
+			dishListIO.setDish(convertToDishIO(dishListDTO.getDishDTO()));
 			dishListIO.setUnitPrice(dishListDTO.getUnitPrice());
 			dishList.add(dishListIO);
 		}
-		menuIO.setDishListIO(dishList);
+		menuIO.setDishList(dishList);
 		return menuIO;
 	}
 
@@ -108,14 +108,14 @@ public class MenuController {
 			IngredientIO ingredientIO = new IngredientIO();
 			ingredientIO.setCode(ingDTO.getIngredientDTO().getCode());
 			ingredientIO.setName(ingDTO.getIngredientDTO().getName());
-			ingIO.setIngredientIO(ingredientIO);
+			ingIO.setIngredient(ingredientIO);
 
 			ingIO.setQunatityUsed(ingDTO.getQunatityUsed());
 			ingIO.setWastage(ingDTO.getWastage());
 			ingIO.setPrice(ingDTO.getPrice());
 			ingredientList.add(ingIO);
 		}
-		dishIO.setDishIngredientIO(ingredientList);
+		dishIO.setDishIngredient(ingredientList);
 
 		List<DishLabourIO> labourList = new ArrayList<>();
 		for (DishLabourDTO labDTO : dishDTO.getDishLabourList()) {
@@ -129,11 +129,11 @@ public class MenuController {
 			labourIO.setSpecialization(labDTO.getLabourDTO().getSpecialization());
 			labourIO.setHourslySalary(labDTO.getLabourDTO().getHourslySalary());
 
-			labIO.setLabourIO(labourIO);
+			labIO.setLabour(labourIO);
 			labIO.setHoursRequired(labDTO.getHoursRequired());
 			labourList.add(labIO);
 		}
-		dishIO.setDishLabourIO(labourList);
+		dishIO.setDishLabour(labourList);
 
 		return dishIO;
 	}
@@ -145,15 +145,15 @@ public class MenuController {
 	    menuDTO.setPrice(menuIO.getPrice());
 
 	    List<DishListDTO> dishListDTOs = new ArrayList<>();
-	    if (menuIO.getDishListIO() != null) {
-	        for (DishListIO dishListIO : menuIO.getDishListIO()) {
+	    if (menuIO.getDishList() != null) {
+	        for (DishListIO dishListIO : menuIO.getDishList()) {
 	            DishListDTO dishListDTO = new DishListDTO();
 	            dishListDTO.setCode(dishListIO.getCode());
 	            dishListDTO.setUnitPrice(dishListIO.getUnitPrice());
 
-	            if (dishListIO.getDishIO() != null) {
+	            if (dishListIO.getDish() != null) {
 	                DishDTO dishDTO = new DishDTO();
-	                dishDTO.setCode(dishListIO.getDishIO().getCode());
+	                dishDTO.setCode(dishListIO.getDish().getCode());
 	                dishListDTO.setDishDTO(dishDTO);
 	            }
 

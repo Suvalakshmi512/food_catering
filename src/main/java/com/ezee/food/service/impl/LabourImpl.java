@@ -1,6 +1,7 @@
 package com.ezee.food.service.impl;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -29,27 +30,44 @@ public class LabourImpl implements LabourService {
 
 	@Override
 	public List<LabourDTO> getAllLabour(String authCode) {
+		List<LabourDTO> list = new ArrayList<LabourDTO>();
+		try {
 		authService.validateAuthCode(authCode);
-		List<LabourDTO> list = dao.getAllLabour();
+		list = dao.getAllLabour();
+		}catch (Exception e) {
+			LOGGER.error("Error while getting all events: {}", e.getMessage(), e);
+			throw new ServiceException(ErrorCode.INTERNAL_SERVER_ERROR, "Unexpected error while fetching labours");
+		}
 		return list;
 	}
 
 	@Override
 	public LabourDTO getLabourByCode(String code, String authCode) {
-		authService.validateAuthCode(authCode);
 		LabourDTO labourDTO = new LabourDTO();
+		try {
+		authService.validateAuthCode(authCode);
+		 labourDTO = new LabourDTO();
 		labourDTO.setCode(code);
-		return dao.getLabour(labourDTO);
+	    dao.getLabour(labourDTO);
+		}catch (Exception e) {
+			LOGGER.error("Error while getting labours: {}", e.getMessage(), e);
+			throw new ServiceException(ErrorCode.INTERNAL_SERVER_ERROR, "Unexpected error while fetching labours");
+		}
+		return labourDTO;
 
 	}
 
 	@Override
 	public void addLabour(LabourDTO labourDTO, String authCode) {
+		try {
 		AuthResponseDTO validateAuthCode = authService.validateAuthCode(authCode);
 		labourDTO.setUpdatedby(validateAuthCode.getUsername());
 		labourDTO.setCode(CodeGenarator.generateCode("LBR", 12));
 		dao.addLabour(labourDTO);
-
+		}catch (Exception e) {
+			LOGGER.error("Error while adding labours: {}", e.getMessage(), e);
+			throw new ServiceException(ErrorCode.INTERNAL_SERVER_ERROR, "Unexpected error while inserting labours");
+		}
 	}
 
 	@Override

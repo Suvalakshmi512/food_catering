@@ -41,7 +41,7 @@ public class DishIngredientController {
 			IngredientIO ingredient = new IngredientIO();
 			ingredient.setCode(dishIngredientDTO.getIngredientDTO().getCode());
 			ingredient.setName(dishIngredientDTO.getIngredientDTO().getName());
-			dishIngIO.setIngredientIO(ingredient);
+			dishIngIO.setIngredient(ingredient);
 			dishIngIO.setQunatityUsed(dishIngredientDTO.getQunatityUsed());
 			dishIngIO.setWastage(dishIngredientDTO.getWastage());
 			dishIngIO.setPrice(dishIngredientDTO.getPrice());
@@ -68,7 +68,7 @@ public class DishIngredientController {
 		IngredientIO ingredient = new IngredientIO();
 		ingredient.setCode(DishIngredientByCode.getIngredientDTO().getCode());
 		ingredient.setName(DishIngredientByCode.getIngredientDTO().getName());
-		dishIngIO.setIngredientIO(ingredient);
+		dishIngIO.setIngredient(ingredient);
 		dishIngIO.setQunatityUsed(DishIngredientByCode.getQunatityUsed());
 		dishIngIO.setWastage(DishIngredientByCode.getWastage());
 		dishIngIO.setPrice(DishIngredientByCode.getPrice());

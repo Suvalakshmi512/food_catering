@@ -11,7 +11,8 @@ public enum ErrorCode {
 	USERNAME_PASSWORD_INCORRECT_EXCEPTION("121", "Invalid credentials"), SERVICE_UNAVAILABLE("122", "Auth API error"),
 	INVALID_TOKEN("123", "Invalid or expired authCode"), UNAUTHORIZED("124", "Access token is missing or invalid"),
 	CACHE_NOT_FOUND_EXCEPTION("125", "Cache not found"),INSERT_FAILED("125", "Insert Operation Failed"),
-	UNEXPECTED_ERROR("126", "Unexpected exception");
+	UNEXPECTED_ERROR("126", "Unexpected exception"),DATA_ALREADY_EXITS("127", "Data already exits in database"),
+	INTERNAL_SERVER_ERROR("127", "Internal Server Error");
 
 	private final String code;
 	private final String message;

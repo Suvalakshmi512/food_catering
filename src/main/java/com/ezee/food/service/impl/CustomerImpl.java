@@ -1,5 +1,6 @@
 package com.ezee.food.service.impl;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -28,25 +29,44 @@ public class CustomerImpl implements CustomerService {
 
 	@Override
 	public List<UserCustomerDTO> getAllCustomer(String authCode) {
+		List<UserCustomerDTO> list = new ArrayList<UserCustomerDTO>();
+		try {
 		authService.validateAuthCode(authCode);
-		List<UserCustomerDTO> list = userCustomerDAO.getAllCustomer();
+	    list = userCustomerDAO.getAllCustomer();
 		return list;
+		}catch (Exception e) {
+			LOGGER.error("Error while getting all Customer: {}", e.getMessage(), e);
+	        e.printStackTrace();
+	    }
+		return list;
+		
 	}
 
 	@Override
 	public UserCustomerDTO getCustomerByCode(String code, String authCode) {
-		authService.validateAuthCode(authCode);
 		UserCustomerDTO customerDTO = new UserCustomerDTO();
+		try {
+		authService.validateAuthCode(authCode);
 		customerDTO.setCode(code);
-		return userCustomerDAO.getCustomer(customerDTO);
+		customerDTO = userCustomerDAO.getCustomer(customerDTO);
+		} catch (Exception e) {
+			LOGGER.error("Error while getting Customer: {}", e.getMessage(), e);
+			throw new ServiceException(ErrorCode.INTERNAL_SERVER_ERROR, "Unexpected error while fetching Customer");
+		}
+		return customerDTO;
 	}
 
 	@Override
 	public UserCustomerDTO addCustomer(UserCustomerDTO customerDTO, String authCode) {
+		try {
 		AuthResponseDTO validateAuthCode = authService.validateAuthCode(authCode);
 		customerDTO.setUpdatedBy(validateAuthCode.getUsername());
 		customerDTO.setCode(CodeGenarator.generateCode("UCT", 12));
 		userCustomerDAO.addCustomer(customerDTO);
+		} catch (Exception e) {
+			LOGGER.error("Error while adding Customer: {}", e.getMessage(), e);
+			throw new ServiceException(ErrorCode.INTERNAL_SERVER_ERROR, "Unexpected error while adding Customer");
+		}
 		return customerDTO;
 
 	}

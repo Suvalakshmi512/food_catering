@@ -1,6 +1,7 @@
 package com.ezee.food.service.impl;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -34,8 +35,10 @@ public class IngredientImp implements IngredientService {
 
 	@Override
 	public List<IngredientDTO> getAllIngredient(String authCode) {
+		List<IngredientDTO> list =new ArrayList<IngredientDTO>();
+		try {
 		authService.validateAuthCode(authCode);
-		List<IngredientDTO> list = dao.getAllIngredient();
+		 list = dao.getAllIngredient();
 		for (IngredientDTO data : list) {
 			TaxDTO tax = taxCache.getTaxFromCache(data.getTaxDTO());
 			data.setTaxDTO(tax);
@@ -43,14 +46,21 @@ public class IngredientImp implements IngredientService {
 				throw new ServiceException(ErrorCode.ID_OR_CODE_NOT_FOUND_EXCEPTION);
 			}
 		}
+		}catch (ServiceException e) {
+			throw e;
+		}
+		catch (Exception e) {
+			LOGGER.error("Error while getting all Ingredients: {}", e.getMessage(), e);
+			throw new ServiceException(ErrorCode.INTERNAL_SERVER_ERROR, "Unexpected error while fetching Ingredients");
+		}
 		return list;
 	}
 
 	@Override
 	public IngredientDTO getIngredientByCode(String code, String authCode) {
-		authService.validateAuthCode(authCode);
-
 		IngredientDTO ingredient = new IngredientDTO();
+		try {
+		authService.validateAuthCode(authCode);
 		ingredient.setCode(code);
 
 		ingredient = dao.getIngredient(ingredient);
@@ -61,16 +71,27 @@ public class IngredientImp implements IngredientService {
 
 		TaxDTO fullTaxDTO = taxCache.getTaxFromCache(ingredient.getTaxDTO());
 		ingredient.setTaxDTO(fullTaxDTO);
-
+		}catch (ServiceException e) {
+			throw e;
+		}
+		catch (Exception e) {
+			LOGGER.error("Error while getting Ingredient: {}", e.getMessage(), e);
+			throw new ServiceException(ErrorCode.INTERNAL_SERVER_ERROR, "Unexpected error while fetching Ingredient");
+		}
 		return ingredient;
 	}
 
 	@Override
 	public void addIngredient(IngredientDTO ingredientDTO, String authCode) {
+		try {
 		AuthResponseDTO validateAuthCode = authService.validateAuthCode(authCode);
 		ingredientDTO.setUpdatedby(validateAuthCode.getUsername());
 		ingredientDTO.setCode(CodeGenarator.generateCode("ING", 12));
 		dao.addIngredient(ingredientDTO);
+		}catch (Exception e) {
+			LOGGER.error("Error while adding Ingredient: {}", e.getMessage(), e);
+			throw new ServiceException(ErrorCode.INTERNAL_SERVER_ERROR, "Unexpected error while inserting ingredient");
+		}
 
 	}
 

@@ -1,6 +1,7 @@
 package com.ezee.food.service.impl;
 
 import java.sql.Connection;
+import java.util.ArrayList;
 import java.util.List;
 import javax.sql.DataSource;
 
@@ -9,6 +10,7 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.ezee.food.Exception.ErrorCode;
 import com.ezee.food.Exception.ServiceException;
 import com.ezee.food.cache.redis.service.RedisDishService;
 import com.ezee.food.dao.DishListDAO;
@@ -44,8 +46,10 @@ public class MenuImpl implements MenuService {
 
 	@Override
 	public List<MenuDTO> getAllMenu(String authCode) {
+		List<MenuDTO> allMenu =new ArrayList<MenuDTO>();
+		try {
 		authService.validateAuthCode(authCode);
-		List<MenuDTO> allMenu = menuDAO.getAllMenu();
+		allMenu = menuDAO.getAllMenu();
 
 		for (MenuDTO menu : allMenu) {
 			for (DishListDTO dishList : menu.getDishListDTO()) {
@@ -55,17 +59,22 @@ public class MenuImpl implements MenuService {
 				dishList.setDishDTO(enrichedDish);
 			}
 		}
+		}catch (Exception e) {
+			LOGGER.error("Error while getting all menus: {}", e.getMessage(), e);
+			throw new ServiceException(ErrorCode.INTERNAL_SERVER_ERROR, "Unexpected error while fetching menus");
+		}
 
 		return allMenu;
 	}
 
 	@Override
 	public MenuDTO getMenuByCode(String code, String authCode) {
-
+		MenuDTO menu = new MenuDTO();
+		try {
 		authService.validateAuthCode(authCode);
 		MenuDTO menuDTO = new MenuDTO();
 		menuDTO.setCode(code);
-		MenuDTO menu = menuDAO.getMenu(menuDTO);
+		menu = menuDAO.getMenu(menuDTO);
 		if (menu.getDishListDTO() == null) {
 			throw new ServiceException("DishList is null");
 		}
@@ -74,6 +83,10 @@ public class MenuImpl implements MenuService {
 			DishDTO enrichedDish = dish.enrichDishDetails(dishDTO);
 
 			dishList.setDishDTO(enrichedDish);
+		}
+		}catch (Exception e) {
+			LOGGER.error("Error while getting menu: {}", e.getMessage(), e);
+			throw new ServiceException(ErrorCode.INTERNAL_SERVER_ERROR, "Unexpected error while fetching menu");
 		}
 		return menu;
 	}

@@ -42,7 +42,7 @@ public class IngredientController {
 			tax.setCode(ingredientDTO.getTaxDTO().getCode());
 			tax.setDescription(ingredientDTO.getTaxDTO().getDescription());
 			tax.setRatePercentage(ingredientDTO.getTaxDTO().getRatePercentage());
-			ingredientIO.setTaxIO(tax);
+			ingredientIO.setTax(tax);
 			ingredient.add(ingredientIO);
 		}
 		return ResponseIO.success(ingredient);
@@ -63,7 +63,7 @@ public class IngredientController {
 		tax.setCode(ingredientDTO.getTaxDTO().getCode());
 		tax.setDescription(ingredientDTO.getTaxDTO().getDescription());
 		tax.setRatePercentage(ingredientDTO.getTaxDTO().getRatePercentage());
-		ingredientIO.setTaxIO(tax);
+		ingredientIO.setTax(tax);
 		return ResponseIO.success(ingredientIO);
 	}
 
@@ -77,7 +77,7 @@ public class IngredientController {
 		ingredientDTO.setUnit(ingredientIO.getUnit());
 		ingredientDTO.setUnitCost(ingredientIO.getUnitCost());
 		TaxDTO tax = new TaxDTO();
-		tax.setCode(ingredientIO.getTaxIO().getCode());
+		tax.setCode(ingredientIO.getTax().getCode());
 		ingredientDTO.setTaxDTO(tax);
 		ingredient.addIngredient(ingredientDTO, authcode);
 		return ResponseIO.success("Inserted Successfully");

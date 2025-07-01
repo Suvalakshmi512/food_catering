@@ -15,6 +15,7 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
+import com.ezee.food.Exception.ErrorCode;
 import com.ezee.food.Exception.ServiceException;
 import com.ezee.food.dto.UserCustomerDTO;
 
@@ -44,6 +45,12 @@ public class UserCustomerDAO {
 		callableStatement.execute();
 		affected=callableStatement.getInt("pitRowCount");
 		
+		if(affected == 2) {
+			throw new ServiceException(ErrorCode.DATA_ALREADY_EXITS);
+		}
+		
+		}catch (ServiceException e) {
+			throw e;
 		}catch (Exception e) {
 			LOGGER.error("\nMessage: {},\nerror: {}", e.getMessage(), e);
 			throw new ServiceException(e.getMessage());

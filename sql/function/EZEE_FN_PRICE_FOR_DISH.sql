@@ -40,6 +40,8 @@ BEGIN
     DECLARE ldlMarginCost   DECIMAL(5,2);
     DECLARE ldlTaxCost      DECIMAL(5,2);
     DECLARE ldlCost     DECIMAL(10,2);
+    DECLARE litMinQuantity INT;
+    DECLARE litServingSize INT;
  
 /*
 *-----------------------------------------------------------------------------------------------------
@@ -55,7 +57,7 @@ BEGIN
        AND active_flag = '1';
 
     /* labour cost */
-    SELECT IFNULL(SUM(dl.hours_required * l.hourly_rate),0)
+    SELECT IFNULL(SUM(dl.hours_required * l.hoursly_salary),0)
       INTO ldlLabourCost
       FROM dish_labour dl
       JOIN labour l ON l.id = dl.labour_id
@@ -63,16 +65,25 @@ BEGIN
        AND dl.active_flag = '1';
 
     /* margin and tax */
-    SELECT d.margin_profit , t.tax_percent
+    SELECT d.margin_profit , t.rate_pct
       INTO ldlMarginCost   , ldlTaxCost
       FROM dish d
       JOIN tax  t ON t.id = d.tax_id
      WHERE d.id = pitDish_id;
+     
+     
+     SELECT min_available_qty , serving_size INTO litMinQuantity , litServingSize
+     FROM dish 
+     WHERE id = pitDish_id;
 
     SET ldlCost = ldlIngCost + ldlLabourCost;
     SET ldlCost = ldlCost + (ldlCost * ldlMarginCost / 100);
     SET ldlCost = ldlCost + (ldlCost * ldlTaxCost    / 100);
+    SET ldlCost = (ldlCost / litMinQuantity) * litServingSize;
+   
 
     RETURN ROUND(ldlCost,2);
 END$$
+
 DELIMITER ;
+

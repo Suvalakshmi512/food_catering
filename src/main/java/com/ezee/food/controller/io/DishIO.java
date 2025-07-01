@@ -16,7 +16,7 @@ public class DishIO extends BaseIO{
 	private BigDecimal marginProfit;
 	private TaxIO taxIO;
 	private BigDecimal price;
-	private List<DishIngredientIO> dishIngredientIO;
-	private List<DishLabourIO> dishLabourIO;
+	private List<DishIngredientIO> dishIngredient;
+	private List<DishLabourIO> dishLabour;
 
 }

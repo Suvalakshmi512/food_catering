@@ -11,7 +11,7 @@ public class IngredientIO extends BaseIO {
 	private BigDecimal unitQuantity;
 	private String unit;
 	private BigDecimal unitCost;
-	private TaxIO taxIO;
+	private TaxIO tax;
 	
 
 }

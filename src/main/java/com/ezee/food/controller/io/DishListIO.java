@@ -7,7 +7,7 @@ import lombok.EqualsAndHashCode;
 @Data
 @EqualsAndHashCode(callSuper = true)
 public class DishListIO extends BaseIO{
-	private MenuIO menuIO;
-	private DishIO dishIO;
+	private MenuIO menu;
+	private DishIO dish;
 	private BigDecimal unitPrice;
 }

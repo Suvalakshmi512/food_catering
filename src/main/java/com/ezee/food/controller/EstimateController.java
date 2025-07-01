@@ -86,8 +86,8 @@ public class EstimateController {
 		customer.setName(dto.getEventDTO().getCustomerDTO().getName());
 		customer.setMobile(dto.getEventDTO().getCustomerDTO().getMobile());
 		customer.setEmail(dto.getEventDTO().getCustomerDTO().getEmail());
-		eventIO.setCustomerIO(customer);
-		estimateIO.setEventIO(eventIO);
+		eventIO.setCustomer(customer);
+		estimateIO.setEvent(eventIO);
 
 		MenuIO menuIO = new MenuIO();
 		menuIO.setCode(dto.getMenuDTO().getCode());
@@ -130,11 +130,11 @@ public class EstimateController {
 				IngredientIO ingredient = new IngredientIO();
 				ingredient.setCode(ingDTO.getIngredientDTO().getCode());
 				ingredient.setName(ingDTO.getIngredientDTO().getName());
-				ingIO.setIngredientIO(ingredient);
+				ingIO.setIngredient(ingredient);
 
 				dishIngredient.add(ingIO);
 			}
-			dishIO.setDishIngredientIO(dishIngredient);
+			dishIO.setDishIngredient(dishIngredient);
 
 			List<DishLabourIO> dishLabourIO = new ArrayList<>();
 			for (DishLabourDTO labDTO : listDTO.getDishDTO().getDishLabourList()) {
@@ -148,17 +148,17 @@ public class EstimateController {
 				labour.setRoleName(labDTO.getLabourDTO().getRoleName());
 				labour.setSpecialization(labDTO.getLabourDTO().getSpecialization());
 				labour.setHourslySalary(labDTO.getLabourDTO().getHourslySalary());
-				labIO.setLabourIO(labour);
+				labIO.setLabour(labour);
 
 				dishLabourIO.add(labIO);
 			}
-			dishIO.setDishLabourIO(dishLabourIO);
+			dishIO.setDishLabour(dishLabourIO);
 
-			dishListIO.setDishIO(dishIO);
+			dishListIO.setDish(dishIO);
 			dishList.add(dishListIO);
 		}
-		menuIO.setDishListIO(dishList);
-		estimateIO.setMenuIO(menuIO);
+		menuIO.setDishList(dishList);
+		estimateIO.setMenu(menuIO);
 
 		return estimateIO;
 	}
@@ -169,11 +169,11 @@ public class EstimateController {
 		dto.setDiscount(io.getDiscount());
 
 		MenuDTO menu = new MenuDTO();
-		menu.setCode(io.getMenuIO().getCode());
+		menu.setCode(io.getMenu().getCode());
 		dto.setMenuDTO(menu);
 
 		EventDTO event = new EventDTO();
-		event.setCode(io.getEventIO().getCode());
+		event.setCode(io.getEvent().getCode());
 		dto.setEventDTO(event);
 
 		return dto;

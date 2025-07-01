@@ -8,6 +8,6 @@ import lombok.EqualsAndHashCode;
 @Data
 @EqualsAndHashCode(callSuper = true)
 public class MenuIO extends BaseIO {
-	private List<DishListIO> dishListIO;
+	private List<DishListIO> dishList;
 	private BigDecimal price;
 }

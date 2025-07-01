@@ -33,6 +33,7 @@ public class EventImpl implements EventService {
 
 	@Override
 	public List<EventDTO> getAllEvent(String authCode) {
+		try {
 		authService.validateAuthCode(authCode);
 		List<EventDTO> list = dao.getAllEvent();
 		for (EventDTO data : list) {
@@ -43,10 +44,18 @@ public class EventImpl implements EventService {
 			}
 		}
 		return list;
+		}catch (ServiceException e) {
+			throw e;
+		}
+		catch (Exception e) {
+			LOGGER.error("Error while getting all events: {}", e.getMessage(), e);
+			throw new ServiceException(ErrorCode.INTERNAL_SERVER_ERROR, "Unexpected error while fetching events");
+		}
 	}
 
 	@Override
 	public EventDTO getEventByCode(String code, String authCode) {
+		try {
 		authService.validateAuthCode(authCode);
 		EventDTO eventDTO = new EventDTO();
 		eventDTO.setCode(code);
@@ -56,18 +65,29 @@ public class EventImpl implements EventService {
 		}
 		UserCustomerDTO customer = userCustomer.getUserCustomerFromCache(eventDTO.getCustomerDTO());
 		eventDTO.setCustomerDTO(customer);
-
 		return eventDTO;
+		}catch (ServiceException e) {
+			throw e;
+		}
+		catch (Exception e) {
+			LOGGER.error("Error while getting all events: {}", e.getMessage(), e);
+			throw new ServiceException(ErrorCode.INTERNAL_SERVER_ERROR, "Unexpected error while fetching events");
+		}
 	}
 
 	@Override
 	public void addEvent(EventDTO eventDTO, String authCode) {
-		AuthResponseDTO validateAuthCode = authService.validateAuthCode(authCode);
-		eventDTO.setUpdatedby(validateAuthCode.getUsername());
-		eventDTO.setCode(CodeGenarator.generateCode("EVT", 12));
-		dao.addEvent(eventDTO);
-
+	    try {
+	        AuthResponseDTO validateAuthCode = authService.validateAuthCode(authCode);
+	        eventDTO.setUpdatedby(validateAuthCode.getUsername());
+	        eventDTO.setCode(CodeGenarator.generateCode("EVT", 12));
+	        dao.addEvent(eventDTO);
+	    } catch (Exception e) {
+			LOGGER.error("Error while adding events: {}", e.getMessage(), e);
+	        e.printStackTrace();
+	    }
 	}
+
 
 	@Override
 	public void update(Map<String, Object> event, EventDTO eventDTO, String authCode) {

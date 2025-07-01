@@ -49,11 +49,11 @@ public class DishListController {
             MenuIO menuIO = new MenuIO();
             menuIO.setCode(dto.getMenuDTO().getCode());
             menuIO.setName(dto.getName()); 
-            io.setMenuIO(menuIO);
+            io.setMenu(menuIO);
         }
 
         if (dto.getDishDTO() != null) {
-            io.setDishIO(mapToDishIO(dto.getDishDTO()));
+            io.setDish(mapToDishIO(dto.getDishDTO()));
         }
 
         return io;
@@ -89,7 +89,7 @@ public class DishListController {
                     IngredientIO ingredient = new IngredientIO();
                     ingredient.setCode(ingDTO.getIngredientDTO().getCode());
                     ingredient.setName(ingDTO.getIngredientDTO().getName());
-                    ingIO.setIngredientIO(ingredient);
+                    ingIO.setIngredient(ingredient);
                 }
 
                 ingIO.setQunatityUsed(ingDTO.getQunatityUsed());
@@ -99,7 +99,7 @@ public class DishListController {
                 ingredients.add(ingIO);
             }
         }
-        dishIO.setDishIngredientIO(ingredients);
+        dishIO.setDishIngredient(ingredients);
 
         List<DishLabourIO> labours = new ArrayList<>();
         if (dto.getDishLabourList() != null) {
@@ -114,14 +114,14 @@ public class DishListController {
                     labour.setRoleName(labDTO.getLabourDTO().getRoleName());
                     labour.setSpecialization(labDTO.getLabourDTO().getSpecialization());
                     labour.setHourslySalary(labDTO.getLabourDTO().getHourslySalary());
-                    labIO.setLabourIO(labour);
+                    labIO.setLabour(labour);
                 }
 
                 labIO.setHoursRequired(labDTO.getHoursRequired());
                 labours.add(labIO);
             }
         }
-        dishIO.setDishLabourIO(labours);
+        dishIO.setDishLabour(labours);
 
         return dishIO;
     }

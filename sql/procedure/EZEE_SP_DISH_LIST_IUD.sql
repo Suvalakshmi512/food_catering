@@ -1,85 +1,78 @@
-DROP FUNCTION IF EXISTS EZEE_FN_PRICE_FOR_DISH;
+DROP PROCEDURE IF EXISTS EZEE_SP_DISH_LIST_IUD;
 DELIMITER $$
-CREATE FUNCTION EZEE_FN_PRICE_FOR_DISH (pitDish_id INT) RETURNS DECIMAL(10,2)
-DETERMINISTIC
-READS SQL DATA
+CREATE PROCEDURE EZEE_SP_DISH_LIST_IUD ( IN  pcrCode VARCHAR(15), pcrMenuCode VARCHAR(15), IN  pcrDishCode VARCHAR(15), IN pitActiveFlag INT, IN pcrUpdatedBy VARCHAR(20), OUT pitRowCount INT )
 /*
-* Procedure Name       : EZEE_FN_PRICE_FOR_DISH
+* Procedure Name       : EZEE_SP_DISH_LABOUR_IUD
 * 
-* Purpose              : Calculate the dish price. 
+* Purpose              : Insert /Update /Delete dish_list Table
 *
-* Input                : Entity Type
+* Input                : None
 *
-* Output               : None
+* Output               : Affected Rows
 *
-* Returns              : price
+* Returns              : None
 *
 * Dependencies
 *
-*     Tables           : None
+*     Tables           : dish_list
 *
-*     Functions        : 
+*     Functions        : None
 *
-*     Procedures       : None
+*     Procedures       :
 *
 * Revision History:
 *
-*     1.0 - 2025/06/19	      Ezee Info 
-*     EzeeTech                 Original Code
+*     1.0 - 2024/06/18      Ezee Info 
+*     Guruprasath             Original Code
 *
 */
 BEGIN
-
+    /*------------------------------------------------------------------
+      Local variables
+    ------------------------------------------------------------------*/
+    DECLARE ldlprice DECIMAL(10,2);
+    DECLARE litDishListId INT DEFAULT 0;
+    DECLARE litDishId INT DEFAULT 0;
+    DECLARE litMenuId INT DEFAULT 0;
+    
+    /* ------------------------------------------------------------
+   * Variable Initialized
+   * ---------------------------------------------------------- */
+    SET pitRowCount = 0;
+    SELECT id INTO litDishId
+    FROM dish
+    WHERE CODE = pcrDishCode;
+    
+    SELECT id INTO litMenuId
+    FROM menu
+    WHERE CODE = pcrMenuCode;
+    
+    SELECT id INTO litDishListId
+    FROM dish_list
+    WHERE CODE = pcrCode;
+    
+    SELECT price INTO ldlprice
+    FROM dish 
+    WHERE id = litDishId;
+    
 /*
-*----------------------------------------------------------------------------------------------------
-* Variable Declare
 *-----------------------------------------------------------------------------------------------------
-*/
-    DECLARE ldlIngCost DECIMAL(10,2) DEFAULT 0;
-    DECLARE ldlLabourCost DECIMAL(10,2) DEFAULT 0;
-    DECLARE ldlMarginCost   DECIMAL(5,2);
-    DECLARE ldlTaxCost      DECIMAL(5,2);
-    DECLARE ldlCost     DECIMAL(10,2);
-    DECLARE litMinQuantity INT;
- 
-/*
-*-----------------------------------------------------------------------------------------------------
-*  Variable Initialized
+*  Increment Last Sequence Number
 *------------------------------------------------------------------------------------------------------
 */
 
-    /* ingredient cost (price is already stored) */
-    SELECT IFNULL(SUM(price),0)
-      INTO ldlIngCost
-      FROM dish_ingredient
-     WHERE dish_id = pitDish_id
-       AND active_flag = '1';
-
-    /* labour cost */
-    SELECT IFNULL(SUM(dl.hours_required * l.hoursly_salary),0)
-      INTO ldlLabourCost
-      FROM dish_labour dl
-      JOIN labour l ON l.id = dl.labour_id
-     WHERE dl.dish_id = pitDish_id
-       AND dl.active_flag = '1';
-
-    /* margin and tax */
-    SELECT d.margin_profit , t.rate_pct
-      INTO ldlMarginCost   , ldlTaxCost
-      FROM dish d
-      JOIN tax  t ON t.id = d.tax_id
-     WHERE d.id = pitDish_id;
-     
-     SELECT min_available_qty INTO litMinQuantity
-     FROM dish 
-     WHERE id = pitDish_id;
-
-    SET ldlCost = ldlIngCost + ldlLabourCost;
-    SET ldlCost = ldlCost + (ldlCost * ldlMarginCost / 100);
-    SET ldlCost = ldlCost + (ldlCost * ldlTaxCost    / 100);
-   
-
-    RETURN ROUND(ldlCost,2);
+        IF ( pitActiveFlag = 1 AND litDishListId != 0 AND EZEE_FN_ISNOTNULL(pcrCode)) THEN
+		UPDATE dish_list SET menu_id = litMenuId, dish_id = litDishId, unit_price = ldlprice, active_flag = pitActiveFlag, updated_by = pcrUpdatedBy, updated_at = NOW() WHERE CODE = pcrCode;
+		SELECT ROW_COUNT() INTO pitRowCount;
+		
+	ELSEIF ( pitActiveFlag = 1 AND litDishListId = 0) THEN
+		INSERT INTO dish_list (CODE, menu_id, dish_id, unit_price, active_flag, updated_by, updated_at) VALUES (pcrCode, litMenuId, litDishId, ldlprice, pitActiveFlag, pcrUpdatedBy, NOW());
+		SELECT ROW_COUNT() INTO pitRowCount;
+		
+	ELSEIF ( pitActiveFlag != 1 AND EZEE_FN_ISNOTNULL(pcrCode) ) THEN
+		UPDATE dish_list SET active_flag = pitActiveFlag, updated_by = pcrUpdatedBy , updated_at = NOW() WHERE CODE = pcrCode;
+		SELECT ROW_COUNT() INTO pitRowCount;
+	END IF;
 END$$
-DELIMITER ;
 
+DELIMITER ; 

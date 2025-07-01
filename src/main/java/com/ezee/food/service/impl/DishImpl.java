@@ -1,6 +1,7 @@
 package com.ezee.food.service.impl;
 
 import java.sql.Connection;
+import java.util.ArrayList;
 import java.util.List;
 import javax.sql.DataSource;
 
@@ -9,6 +10,7 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.ezee.food.Exception.ErrorCode;
 import com.ezee.food.Exception.ServiceException;
 import com.ezee.food.cache.redis.service.RedisIngredientService;
 import com.ezee.food.cache.redis.service.RedisLabourService;
@@ -52,23 +54,36 @@ public class DishImpl implements DishService {
 
 	@Override
 	public List<DishDTO> getAllDish(String authCode) {
-		authService.validateAuthCode(authCode);
-		List<DishDTO> allDish = dishDAO.getAllDish();
-		for (DishDTO dish : allDish) {
-			enrichDishDetails(dish);
+		List<DishDTO> allDish = new ArrayList<DishDTO>();
+		try {
+			authService.validateAuthCode(authCode);
+			allDish = dishDAO.getAllDish();
+			for (DishDTO dish : allDish) {
+				enrichDishDetails(dish);
+			}
+
+		}  catch (Exception e) {
+			LOGGER.error("Error while getting all Dish: {}", e.getMessage(), e);
+			throw new ServiceException(ErrorCode.INTERNAL_SERVER_ERROR, "Unexpected error while fetching Dish");
 		}
 		return allDish;
 	}
 
 	@Override
 	public DishDTO getDishByCode(String code, String authCode) {
+		DishDTO dish = new DishDTO();
+		try {
 		authService.validateAuthCode(authCode);
 
 		DishDTO dishDTO = new DishDTO();
 		dishDTO.setCode(code);
 
-		DishDTO dish = dishDAO.getDish(dishDTO);
+		dish = dishDAO.getDish(dishDTO);
+		} catch (Exception e) {
+			LOGGER.error("Error while getting Dish: {}", e.getMessage(), e);
+			throw new ServiceException(ErrorCode.INTERNAL_SERVER_ERROR, "Unexpected error while fetching Dish");
 
+		}
 		return enrichDishDetails(dish);
 	}
 
@@ -128,6 +143,7 @@ public class DishImpl implements DishService {
 
 	@Override
 	public DishDTO enrichDishDetails(DishDTO dish) {
+		try {
 		if (dish.getTaxDTO().getId() == 0) {
 			throw new ServiceException("Tax ID is 0 for dish: " + dish.getCode());
 		}
@@ -143,6 +159,9 @@ public class DishImpl implements DishService {
 		for (DishLabourDTO lab : dish.getDishLabourList()) {
 			LabourDTO fullLabour = labour.getLabourFromCache(lab.getLabourDTO());
 			lab.setLabourDTO(fullLabour);
+		}
+		}catch (Exception e) {
+			throw new ServiceException("Error adding dish: " + e.getMessage(), e);
 		}
 
 		return dish;
