@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.ezee.food.Exception.ErrorCode;
 import com.ezee.food.Exception.ServiceException;
 import com.ezee.food.controller.io.DishIO;
 import com.ezee.food.controller.io.DishIngredientIO;
@@ -56,12 +57,16 @@ public class MenuController {
 		try {
 			MenuDTO menuDTO = convertToMenuDTO(menuIO);
 			menu.addMenu(menuDTO, authCode);
-			return ResponseIO.success("Menu inserted successfully");
+			if(menuDTO.getId() == 0) {
+				throw new ServiceException(ErrorCode.ID_OR_CODE_NOT_FOUND_EXCEPTION);
+			}
+			menu.updatePrice(menuDTO.getId(), authCode);
 		} catch (ServiceException se) {
-			return ResponseIO.failure("125", "Failed to insert menu: " + se.getMessage());
+			 ResponseIO.failure("125", "Failed to insert menu: " + se.getMessage());
 		} catch (Exception e) {
-			return ResponseIO.failure("126", "Unexpected error: " + e.getMessage());
+			 ResponseIO.failure("126", "Unexpected error: " + e.getMessage());
 		}
+		return ResponseIO.success("Menu inserted successfully");
 	}
 
 	private MenuIO convertToMenuIO(MenuDTO menuDTO) {
@@ -144,7 +149,7 @@ public class MenuController {
 	    menuDTO.setName(menuIO.getName());
 	    menuDTO.setPrice(menuIO.getPrice());
 
-	    List<DishListDTO> dishListDTOs = new ArrayList<>();
+	    List<DishListDTO> dishList = new ArrayList<>();
 	    if (menuIO.getDishList() != null) {
 	        for (DishListIO dishListIO : menuIO.getDishList()) {
 	            DishListDTO dishListDTO = new DishListDTO();
@@ -157,14 +162,11 @@ public class MenuController {
 	                dishListDTO.setDishDTO(dishDTO);
 	            }
 
-	            dishListDTOs.add(dishListDTO);
+	            dishList.add(dishListDTO);
 	        }
 	    }
-
-	    menuDTO.setDishListDTO(dishListDTOs);
+	    menuDTO.setDishListDTO(dishList);
 
 	    return menuDTO;
 	}
-
-
 }

@@ -42,8 +42,9 @@ public class RedisTax implements RedisTaxService {
 				response = convertToDTO(cacheDTO);
 			}
 		}
-
+		if(response == null) {
 		response = taxDAO.getTax(inputDTO);
+		}
 		if (response != null && response.getCode() != null) {
 			TaxCacheDTO cacheDTO = convertToCacheDTO(response);
 			putTaxCache(cacheKey, cacheDTO);

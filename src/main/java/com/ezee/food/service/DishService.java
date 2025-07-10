@@ -12,4 +12,6 @@ public interface DishService {
 	
 	public DishDTO enrichDishDetails(DishDTO dish);
 
+	public void updatePrice(int id, String authcode);
+
 }

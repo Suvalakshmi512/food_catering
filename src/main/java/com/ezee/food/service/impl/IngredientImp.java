@@ -35,21 +35,20 @@ public class IngredientImp implements IngredientService {
 
 	@Override
 	public List<IngredientDTO> getAllIngredient(String authCode) {
-		List<IngredientDTO> list =new ArrayList<IngredientDTO>();
+		List<IngredientDTO> list = new ArrayList<IngredientDTO>();
 		try {
-		authService.validateAuthCode(authCode);
-		 list = dao.getAllIngredient();
-		for (IngredientDTO data : list) {
-			TaxDTO tax = taxCache.getTaxFromCache(data.getTaxDTO());
-			data.setTaxDTO(tax);
-			if (data.getTaxDTO().getId() == 0) {
-				throw new ServiceException(ErrorCode.ID_OR_CODE_NOT_FOUND_EXCEPTION);
+			authService.validateAuthCode(authCode);
+			list = dao.getAllIngredient();
+			for (IngredientDTO data : list) {
+				TaxDTO tax = taxCache.getTaxFromCache(data.getTaxDTO());
+				data.setTaxDTO(tax);
+				if (data.getTaxDTO().getId() == 0) {
+					throw new ServiceException(ErrorCode.ID_OR_CODE_NOT_FOUND_EXCEPTION);
+				}
 			}
-		}
-		}catch (ServiceException e) {
+		} catch (ServiceException e) {
 			throw e;
-		}
-		catch (Exception e) {
+		} catch (Exception e) {
 			LOGGER.error("Error while getting all Ingredients: {}", e.getMessage(), e);
 			throw new ServiceException(ErrorCode.INTERNAL_SERVER_ERROR, "Unexpected error while fetching Ingredients");
 		}
@@ -60,21 +59,20 @@ public class IngredientImp implements IngredientService {
 	public IngredientDTO getIngredientByCode(String code, String authCode) {
 		IngredientDTO ingredient = new IngredientDTO();
 		try {
-		authService.validateAuthCode(authCode);
-		ingredient.setCode(code);
+			authService.validateAuthCode(authCode);
+			ingredient.setCode(code);
 
-		ingredient = dao.getIngredient(ingredient);
+			ingredient = dao.getIngredient(ingredient);
 
-		if (ingredient.getTaxDTO() == null || ingredient.getTaxDTO().getId() == 0) {
-			throw new ServiceException(ErrorCode.ID_OR_CODE_NOT_FOUND_EXCEPTION);
-		}
+			if (ingredient.getTaxDTO() == null || ingredient.getTaxDTO().getId() == 0) {
+				throw new ServiceException(ErrorCode.ID_OR_CODE_NOT_FOUND_EXCEPTION);
+			}
 
-		TaxDTO fullTaxDTO = taxCache.getTaxFromCache(ingredient.getTaxDTO());
-		ingredient.setTaxDTO(fullTaxDTO);
-		}catch (ServiceException e) {
+			TaxDTO fullTaxDTO = taxCache.getTaxFromCache(ingredient.getTaxDTO());
+			ingredient.setTaxDTO(fullTaxDTO);
+		} catch (ServiceException e) {
 			throw e;
-		}
-		catch (Exception e) {
+		} catch (Exception e) {
 			LOGGER.error("Error while getting Ingredient: {}", e.getMessage(), e);
 			throw new ServiceException(ErrorCode.INTERNAL_SERVER_ERROR, "Unexpected error while fetching Ingredient");
 		}
@@ -84,11 +82,11 @@ public class IngredientImp implements IngredientService {
 	@Override
 	public void addIngredient(IngredientDTO ingredientDTO, String authCode) {
 		try {
-		AuthResponseDTO validateAuthCode = authService.validateAuthCode(authCode);
-		ingredientDTO.setUpdatedby(validateAuthCode.getUsername());
-		ingredientDTO.setCode(CodeGenarator.generateCode("ING", 12));
-		dao.addIngredient(ingredientDTO);
-		}catch (Exception e) {
+			AuthResponseDTO validateAuthCode = authService.validateAuthCode(authCode);
+			ingredientDTO.setUpdatedby(validateAuthCode.getUsername());
+			ingredientDTO.setCode(CodeGenarator.generateCode("ING", 12));
+			dao.addIngredient(ingredientDTO);
+		} catch (Exception e) {
 			LOGGER.error("Error while adding Ingredient: {}", e.getMessage(), e);
 			throw new ServiceException(ErrorCode.INTERNAL_SERVER_ERROR, "Unexpected error while inserting ingredient");
 		}

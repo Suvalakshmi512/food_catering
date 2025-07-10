@@ -40,8 +40,9 @@ public class RedisLabour implements RedisLabourService {
 				response = convertToDTO(cacheDTO);
 			}
 		}
-
+		if(response == null) {
 		response = labourDAO.getLabour(inputDTO);
+		}
 		if (response != null && response.getCode() != null) {
 			LabourCacheDTO cacheDTO = convertToCacheDTO(response);
 			putLabourCache(cacheKey, cacheDTO);

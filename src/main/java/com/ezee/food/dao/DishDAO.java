@@ -254,26 +254,30 @@ public class DishDAO {
 		return list;
 	}
 
-	public int calculateAndUpdateDishPrice(int dishId, Connection connection) {
-		String selectSql = "SELECT EZEE_FN_PRICE_FOR_DISH(?)";
-		BigDecimal calculatedPrice;
-
-		try (PreparedStatement prepareState = connection.prepareStatement(selectSql)) {
+	public int calculateAndUpdateDishPrice(int dishId) {
+		int affected = 0;
+		try {
+			@Cleanup
+			Connection connection = dataSource.getConnection();
+			String selectSql = "SELECT EZEE_FN_PRICE_FOR_DISH(?)";
+			BigDecimal calculatedPrice;
+			@Cleanup
+			PreparedStatement prepareState = connection.prepareStatement(selectSql);
 			prepareState.setInt(1, dishId);
-			try (ResultSet rs = prepareState.executeQuery()) {
+			@Cleanup
+			ResultSet rs = prepareState.executeQuery();
 				if (rs.next()) {
 					calculatedPrice = rs.getBigDecimal(1);
 				} else {
 					throw new ServiceException("Failed to calculate dish price using SQL function.");
 				}
-			}
 
 			String updateSql = "UPDATE dish SET price = ? WHERE id = ?";
-			try (PreparedStatement prepareStatement = connection.prepareStatement(updateSql)) {
+			@Cleanup
+			PreparedStatement prepareStatement = connection.prepareStatement(updateSql);
 				prepareStatement.setBigDecimal(1, calculatedPrice);
 				prepareStatement.setInt(2, dishId);
-				return prepareStatement.executeUpdate();
-			}
+				affected = prepareStatement.executeUpdate();
 
 		} catch (SQLException e) {
 			LOGGER.error("\nMessage: {},\nerror: {}", e.getMessage(), e);
@@ -282,5 +286,6 @@ public class DishDAO {
 			LOGGER.error("\nMessage: {},\nerror: {}", e.getMessage(), e);
 			throw new ServiceException("Unexpected error: " + e.getMessage(), e);
 		}
+		return affected;
 	}
 }

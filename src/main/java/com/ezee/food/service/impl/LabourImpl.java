@@ -32,9 +32,11 @@ public class LabourImpl implements LabourService {
 	public List<LabourDTO> getAllLabour(String authCode) {
 		List<LabourDTO> list = new ArrayList<LabourDTO>();
 		try {
-		authService.validateAuthCode(authCode);
-		list = dao.getAllLabour();
-		}catch (Exception e) {
+			authService.validateAuthCode(authCode);
+			list = dao.getAllLabour();
+		} catch (ServiceException e) {
+			throw e;
+		} catch (Exception e) {
 			LOGGER.error("Error while getting all events: {}", e.getMessage(), e);
 			throw new ServiceException(ErrorCode.INTERNAL_SERVER_ERROR, "Unexpected error while fetching labours");
 		}
@@ -45,11 +47,13 @@ public class LabourImpl implements LabourService {
 	public LabourDTO getLabourByCode(String code, String authCode) {
 		LabourDTO labourDTO = new LabourDTO();
 		try {
-		authService.validateAuthCode(authCode);
-		 labourDTO = new LabourDTO();
-		labourDTO.setCode(code);
-	    dao.getLabour(labourDTO);
-		}catch (Exception e) {
+			authService.validateAuthCode(authCode);
+			labourDTO = new LabourDTO();
+			labourDTO.setCode(code);
+			dao.getLabour(labourDTO);
+		} catch (ServiceException e) {
+			throw e;
+		} catch (Exception e) {
 			LOGGER.error("Error while getting labours: {}", e.getMessage(), e);
 			throw new ServiceException(ErrorCode.INTERNAL_SERVER_ERROR, "Unexpected error while fetching labours");
 		}
@@ -60,11 +64,11 @@ public class LabourImpl implements LabourService {
 	@Override
 	public void addLabour(LabourDTO labourDTO, String authCode) {
 		try {
-		AuthResponseDTO validateAuthCode = authService.validateAuthCode(authCode);
-		labourDTO.setUpdatedby(validateAuthCode.getUsername());
-		labourDTO.setCode(CodeGenarator.generateCode("LBR", 12));
-		dao.addLabour(labourDTO);
-		}catch (Exception e) {
+			AuthResponseDTO validateAuthCode = authService.validateAuthCode(authCode);
+			labourDTO.setUpdatedby(validateAuthCode.getUsername());
+			labourDTO.setCode(CodeGenarator.generateCode("LBR", 12));
+			dao.addLabour(labourDTO);
+		} catch (Exception e) {
 			LOGGER.error("Error while adding labours: {}", e.getMessage(), e);
 			throw new ServiceException(ErrorCode.INTERNAL_SERVER_ERROR, "Unexpected error while inserting labours");
 		}

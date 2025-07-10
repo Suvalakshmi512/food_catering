@@ -163,17 +163,24 @@ public class MenuDAO {
 		return list;
 	}
 
-	public int calculateAndUpdateMenuPrice(int id, Connection connection) {
-		String sql = "UPDATE menu SET price = ( SELECT IFNULL(SUM(unit_price), 0) FROM dish_list  WHERE menu_id = ? AND active_flag = '1' ) WHERE id = ?";
-
-		try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+	public int calculateAndUpdateMenuPrice(int id) {
+		int affected = 0;
+		try {
+			@Cleanup
+			Connection connection = dataSource.getConnection();
+			String sql = "UPDATE menu SET price = ( SELECT IFNULL(SUM(unit_price), 0) FROM dish_list  WHERE menu_id = ? AND active_flag = '1' ) WHERE id = ?";
+			@Cleanup
+			PreparedStatement stmt = connection.prepareStatement(sql);
 			stmt.setInt(1, id);
 			stmt.setInt(2, id);
-			return stmt.executeUpdate();
+			affected =stmt.executeUpdate();
 		} catch (Exception e) {
 			LOGGER.error("\nMessage: {},\nerror: {}", e.getMessage(), e);
 			throw new ServiceException(e.getMessage());
 		}
+		return affected;
 	}
+
+	
 
 }

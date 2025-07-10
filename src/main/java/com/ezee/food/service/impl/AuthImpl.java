@@ -59,7 +59,7 @@ public class AuthImpl implements AuthService {
 				response = byKey;
 			} else {
 				LOGGER.warn("authCode not found in cache: {}", authCode);
-				throw new ServiceException(ErrorCode.INVALID_TOKEN, "Invalid or expired authCode");
+				throw new ServiceException(ErrorCode.INVALID_TOKEN);
 			}
 		} catch (ServiceException e) {
 			LOGGER.error("Service exception during token validation: {}", e.getMessage(), e);

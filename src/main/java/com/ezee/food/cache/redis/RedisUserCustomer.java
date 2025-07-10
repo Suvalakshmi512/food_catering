@@ -42,8 +42,9 @@ public class RedisUserCustomer implements RedisUserCustomerService {
 				response = convertToDTO(cacheDTO);
 			}
 		}
-
+		if(response == null) {
 		response = userCustomerDAO.getCustomer(inputDTO);
+		}
 		if (response != null && response.getCode() != null) {
 			UserCustomerCacheDTO cacheDTO = convertToCacheDTO(response);
 			putUserCustomerCache(cacheKey, cacheDTO);

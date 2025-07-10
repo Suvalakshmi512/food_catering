@@ -33,61 +33,63 @@ public class EventImpl implements EventService {
 
 	@Override
 	public List<EventDTO> getAllEvent(String authCode) {
+		List<EventDTO> list = null;
 		try {
-		authService.validateAuthCode(authCode);
-		List<EventDTO> list = dao.getAllEvent();
-		for (EventDTO data : list) {
-			UserCustomerDTO customer = userCustomer.getUserCustomerFromCache(data.getCustomerDTO());
-			data.setCustomerDTO(customer);
-			if (data.getCustomerDTO().getId() == 0) {
-				throw new ServiceException(ErrorCode.ID_OR_CODE_NOT_FOUND_EXCEPTION);
+			authService.validateAuthCode(authCode);
+			list = dao.getAllEvent();
+			for (EventDTO data : list) {
+				UserCustomerDTO customer = userCustomer.getUserCustomerFromCache(data.getCustomerDTO());
+				data.setCustomerDTO(customer);
+				if (data.getCustomerDTO().getId() == 0) {
+					throw new ServiceException(ErrorCode.ID_OR_CODE_NOT_FOUND_EXCEPTION);
+				}
 			}
-		}
-		return list;
-		}catch (ServiceException e) {
+
+		} catch (ServiceException e) {
 			throw e;
-		}
-		catch (Exception e) {
+		} catch (Exception e) {
 			LOGGER.error("Error while getting all events: {}", e.getMessage(), e);
 			throw new ServiceException(ErrorCode.INTERNAL_SERVER_ERROR, "Unexpected error while fetching events");
 		}
+		return list;
 	}
 
 	@Override
 	public EventDTO getEventByCode(String code, String authCode) {
-		try {
-		authService.validateAuthCode(authCode);
 		EventDTO eventDTO = new EventDTO();
-		eventDTO.setCode(code);
-		eventDTO = dao.getEvent(eventDTO);
-		if (eventDTO.getCustomerDTO() == null || eventDTO.getCustomerDTO().getId() == 0) {
-			throw new ServiceException(ErrorCode.ID_OR_CODE_NOT_FOUND_EXCEPTION);
-		}
-		UserCustomerDTO customer = userCustomer.getUserCustomerFromCache(eventDTO.getCustomerDTO());
-		eventDTO.setCustomerDTO(customer);
-		return eventDTO;
-		}catch (ServiceException e) {
+		try {
+			authService.validateAuthCode(authCode);
+			eventDTO.setCode(code);
+			eventDTO = dao.getEvent(eventDTO);
+			if (eventDTO.getCustomerDTO() == null || eventDTO.getCustomerDTO().getId() == 0) {
+				throw new ServiceException(ErrorCode.ID_OR_CODE_NOT_FOUND_EXCEPTION);
+			}
+			UserCustomerDTO customer = userCustomer.getUserCustomerFromCache(eventDTO.getCustomerDTO());
+			eventDTO.setCustomerDTO(customer);
+
+		} catch (ServiceException e) {
 			throw e;
-		}
-		catch (Exception e) {
+		} catch (Exception e) {
 			LOGGER.error("Error while getting all events: {}", e.getMessage(), e);
 			throw new ServiceException(ErrorCode.INTERNAL_SERVER_ERROR, "Unexpected error while fetching events");
 		}
+		return eventDTO;
 	}
 
 	@Override
 	public void addEvent(EventDTO eventDTO, String authCode) {
-	    try {
-	        AuthResponseDTO validateAuthCode = authService.validateAuthCode(authCode);
-	        eventDTO.setUpdatedby(validateAuthCode.getUsername());
-	        eventDTO.setCode(CodeGenarator.generateCode("EVT", 12));
-	        dao.addEvent(eventDTO);
-	    } catch (Exception e) {
+		try {
+			AuthResponseDTO validateAuthCode = authService.validateAuthCode(authCode);
+			eventDTO.setUpdatedby(validateAuthCode.getUsername());
+			eventDTO.setCode(CodeGenarator.generateCode("EVT", 12));
+			dao.addEvent(eventDTO);
+		} catch (ServiceException e) {
+			throw e;
+		} catch (Exception e) {
 			LOGGER.error("Error while adding events: {}", e.getMessage(), e);
-	        e.printStackTrace();
-	    }
+			e.printStackTrace();
+		}
 	}
-
 
 	@Override
 	public void update(Map<String, Object> event, EventDTO eventDTO, String authCode) {

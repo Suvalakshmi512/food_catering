@@ -64,7 +64,8 @@ public class DishController {
 		try {
 			DishDTO dishDTO = mapToDishDTO(dishIO);
 			dish.addDish(dishDTO, authCode);
-			return ResponseIO.success("Dish inserted successfully");
+			dish.updatePrice(dishDTO.getId(), authCode);
+			
 		} catch (ServiceException se) {
 			LOGGER.error("ServiceException while adding dish: {}", se.getMessage());
 			return ResponseIO.failure("125", "Failed to insert dish: " + se.getMessage());
@@ -72,6 +73,7 @@ public class DishController {
 			LOGGER.error("Unexpected exception while adding dish", e);
 			return ResponseIO.failure("126", "Unexpected error: " + e.getMessage());
 		}
+		return ResponseIO.success("Dish inserted successfully");
 	}
 
 	private DishIO mapToDishIO(DishDTO dishDTO) {

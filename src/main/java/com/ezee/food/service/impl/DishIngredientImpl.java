@@ -54,7 +54,8 @@ public class DishIngredientImpl implements DishIngredientService {
 			throw e;
 		} catch (Exception e) {
 			LOGGER.error("Error while getting all DishIngredient: {}", e.getMessage(), e);
-			throw new ServiceException(ErrorCode.INTERNAL_SERVER_ERROR, "Unexpected error while fetching DishIngredient");
+			throw new ServiceException(ErrorCode.INTERNAL_SERVER_ERROR,
+					"Unexpected error while fetching DishIngredient");
 
 		}
 		return list;
@@ -79,7 +80,8 @@ public class DishIngredientImpl implements DishIngredientService {
 			throw e;
 		} catch (Exception e) {
 			LOGGER.error("Error while getting DishIngredient: {}", e.getMessage(), e);
-			throw new ServiceException(ErrorCode.INTERNAL_SERVER_ERROR, "Unexpected error while fetching DishIngredient");
+			throw new ServiceException(ErrorCode.INTERNAL_SERVER_ERROR,
+					"Unexpected error while fetching DishIngredient");
 		}
 		return ingredient;
 	}

@@ -42,8 +42,9 @@ public class RedisMenu implements RedisMenuService{
 				response = convertToDTO(cacheDTO);
 			}
 		}
-
+		if(response == null) {
 		response = menuDAO.getMenu(inputDTO);
+		}
 		if (response != null && response.getCode() != null) {
 			MenuCacheDTO cacheDTO = convertToCacheDTO(response);
 			putMenuCache(cacheKey, cacheDTO);

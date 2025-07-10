@@ -70,12 +70,12 @@ public class DishListImpl implements DishListService {
 			if (data.getMenuDTO().getId() == 0) {
 				throw new ServiceException(ErrorCode.ID_OR_CODE_NOT_FOUND_EXCEPTION);
 			}
-			return dao.getDishList(dishListDTO);
 		} catch (ServiceException e) {
 			throw e;
 		} catch (Exception e) {
 			LOGGER.error("Error while getting  DishList: {}", e.getMessage(), e);
 			throw new ServiceException(ErrorCode.INTERNAL_SERVER_ERROR, "Unexpected error while fetching DishList");
 		}
+		return data;
 	}
 }

@@ -35,8 +35,9 @@ public class RedisDishLabour implements RedisDishLabourService {
 				response = convertToDTO(cacheDTO);
 			}
 		}
-
+		if(response == null) {
 		response = dishLabourDAO.getDishLabour(inputDTO);
+		}
 		if (response != null && response.getCode() != null) {
 			DishLabourCacheDTO cacheDTO = convertToCacheDTO(response);
 			putDishLabourCache(cacheKey, cacheDTO);

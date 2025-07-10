@@ -41,8 +41,9 @@ public class RedisDish implements RedisDishService{
                 response = convertToDTO(cacheDTO);
             }
         }
-
+		if(response == null) {
         response = dishDAO.getDish(inputDTO);
+		}
         if (response != null && response.getCode() != null) {
             DishCacheDTO cacheDTO = convertToCacheDTO(response);
             putDishCache(cacheKey, cacheDTO);

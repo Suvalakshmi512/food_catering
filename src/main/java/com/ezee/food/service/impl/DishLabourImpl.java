@@ -28,30 +28,28 @@ public class DishLabourImpl implements DishLabourService {
 	@Autowired
 	private RedisLabourService labour;
 
-	
 	private static final Logger LOGGER = LogManager.getLogger("com.ezee.food.impl");
 
 	@Override
 	public List<DishLabourDTO> getAllDishLabour(String authCode) {
 		List<DishLabourDTO> list = new ArrayList<DishLabourDTO>();
 		try {
-		authService.validateAuthCode(authCode);
-	    list = dao.getAllDishLabour();
-		for (DishLabourDTO data : list) {
-			dishCache.getDishFromCache(data.getDishDTO());
-			if (data.getDishDTO().getId() == 0) {
-				throw new ServiceException(ErrorCode.ID_OR_CODE_NOT_FOUND_EXCEPTION);
-			}
+			authService.validateAuthCode(authCode);
+			list = dao.getAllDishLabour();
+			for (DishLabourDTO data : list) {
+				dishCache.getDishFromCache(data.getDishDTO());
+				if (data.getDishDTO().getId() == 0) {
+					throw new ServiceException(ErrorCode.ID_OR_CODE_NOT_FOUND_EXCEPTION);
+				}
 
-			labour.getLabourFromCache(data.getLabourDTO());
-			if (data.getLabourDTO().getId() == 0) {
-				throw new ServiceException(ErrorCode.ID_OR_CODE_NOT_FOUND_EXCEPTION);
+				labour.getLabourFromCache(data.getLabourDTO());
+				if (data.getLabourDTO().getId() == 0) {
+					throw new ServiceException(ErrorCode.ID_OR_CODE_NOT_FOUND_EXCEPTION);
+				}
 			}
-		}
-		}catch (ServiceException e) {
+		} catch (ServiceException e) {
 			throw e;
-		}
-		catch (Exception e) {
+		} catch (Exception e) {
 			LOGGER.error("Error while getting all DishLabour: {}", e.getMessage(), e);
 			throw new ServiceException(ErrorCode.INTERNAL_SERVER_ERROR, "Unexpected error while fetching DishLabour");
 		}
@@ -62,20 +60,19 @@ public class DishLabourImpl implements DishLabourService {
 	public DishLabourDTO getDishLabourByCode(DishLabourDTO dishLabourDTO, String authCode) {
 		DishLabourDTO dishLabour = new DishLabourDTO();
 		try {
-		authService.validateAuthCode(authCode);
-		dishLabour = dao.getDishLabour(dishLabourDTO);
-		labour.getLabourFromCache(dishLabour.getLabourDTO());
-		if (dishLabourDTO.getLabourDTO().getId() == 0) {
-			throw new ServiceException(ErrorCode.ID_OR_CODE_NOT_FOUND_EXCEPTION);
-		}
-		dishCache.getDishFromCache(dishLabour.getDishDTO());
-		if (dishLabourDTO.getDishDTO().getId() == 0) {
-			throw new ServiceException(ErrorCode.ID_OR_CODE_NOT_FOUND_EXCEPTION);
-		}
+			authService.validateAuthCode(authCode);
+			dishLabour = dao.getDishLabour(dishLabourDTO);
+			labour.getLabourFromCache(dishLabour.getLabourDTO());
+			if (dishLabourDTO.getLabourDTO().getId() == 0) {
+				throw new ServiceException(ErrorCode.ID_OR_CODE_NOT_FOUND_EXCEPTION);
+			}
+			dishCache.getDishFromCache(dishLabour.getDishDTO());
+			if (dishLabourDTO.getDishDTO().getId() == 0) {
+				throw new ServiceException(ErrorCode.ID_OR_CODE_NOT_FOUND_EXCEPTION);
+			}
 		} catch (ServiceException e) {
 			throw e;
-		}
-		catch (Exception e) {
+		} catch (Exception e) {
 			LOGGER.error("Error while getting DishLabour: {}", e.getMessage(), e);
 			throw new ServiceException(ErrorCode.INTERNAL_SERVER_ERROR, "Unexpected error while fetching DishLabour");
 		}

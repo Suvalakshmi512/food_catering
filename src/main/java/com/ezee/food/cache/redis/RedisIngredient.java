@@ -32,8 +32,9 @@ public class RedisIngredient implements RedisIngredientService {
 			IngredientCacheDTO cacheDTO = (IngredientCacheDTO) wrapper.get();
 			response = convertToIngredientDTO(cacheDTO);
 		}
-
+		if(response == null) {
 		response = ingredientDAO.getIngredient(ingredientDTO);
+		}
 		if (response != null && response.getCode() != null) {
 			IngredientCacheDTO cacheDTO = convertToCacheDTO(response);
 			putIngredientCache("ING_" + response.getCode(), cacheDTO);

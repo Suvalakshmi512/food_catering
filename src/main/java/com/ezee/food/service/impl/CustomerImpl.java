@@ -31,24 +31,27 @@ public class CustomerImpl implements CustomerService {
 	public List<UserCustomerDTO> getAllCustomer(String authCode) {
 		List<UserCustomerDTO> list = new ArrayList<UserCustomerDTO>();
 		try {
-		authService.validateAuthCode(authCode);
-	    list = userCustomerDAO.getAllCustomer();
-		return list;
-		}catch (Exception e) {
+			authService.validateAuthCode(authCode);
+			list = userCustomerDAO.getAllCustomer();
+			return list;
+		} catch (ServiceException se) {
+			LOGGER.error("Service exception while getting all Dish: {}", se.getMessage(), se);
+			throw se;
+		} catch (Exception e) {
 			LOGGER.error("Error while getting all Customer: {}", e.getMessage(), e);
-	        e.printStackTrace();
-	    }
+			e.printStackTrace();
+		}
 		return list;
-		
+
 	}
 
 	@Override
 	public UserCustomerDTO getCustomerByCode(String code, String authCode) {
 		UserCustomerDTO customerDTO = new UserCustomerDTO();
 		try {
-		authService.validateAuthCode(authCode);
-		customerDTO.setCode(code);
-		customerDTO = userCustomerDAO.getCustomer(customerDTO);
+			authService.validateAuthCode(authCode);
+			customerDTO.setCode(code);
+			customerDTO = userCustomerDAO.getCustomer(customerDTO);
 		} catch (Exception e) {
 			LOGGER.error("Error while getting Customer: {}", e.getMessage(), e);
 			throw new ServiceException(ErrorCode.INTERNAL_SERVER_ERROR, "Unexpected error while fetching Customer");
@@ -59,10 +62,13 @@ public class CustomerImpl implements CustomerService {
 	@Override
 	public UserCustomerDTO addCustomer(UserCustomerDTO customerDTO, String authCode) {
 		try {
-		AuthResponseDTO validateAuthCode = authService.validateAuthCode(authCode);
-		customerDTO.setUpdatedBy(validateAuthCode.getUsername());
-		customerDTO.setCode(CodeGenarator.generateCode("UCT", 12));
-		userCustomerDAO.addCustomer(customerDTO);
+			AuthResponseDTO validateAuthCode = authService.validateAuthCode(authCode);
+			customerDTO.setUpdatedBy(validateAuthCode.getUsername());
+			customerDTO.setCode(CodeGenarator.generateCode("UCT", 12));
+			userCustomerDAO.addCustomer(customerDTO);
+		} catch (ServiceException se) {
+			LOGGER.error("Service exception while getting all Dish: {}", se.getMessage(), se);
+			throw se;
 		} catch (Exception e) {
 			LOGGER.error("Error while adding Customer: {}", e.getMessage(), e);
 			throw new ServiceException(ErrorCode.INTERNAL_SERVER_ERROR, "Unexpected error while adding Customer");

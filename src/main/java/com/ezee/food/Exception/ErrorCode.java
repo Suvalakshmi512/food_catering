@@ -12,7 +12,7 @@ public enum ErrorCode {
 	INVALID_TOKEN("123", "Invalid or expired authCode"), UNAUTHORIZED("124", "Access token is missing or invalid"),
 	CACHE_NOT_FOUND_EXCEPTION("125", "Cache not found"),INSERT_FAILED("125", "Insert Operation Failed"),
 	UNEXPECTED_ERROR("126", "Unexpected exception"),DATA_ALREADY_EXITS("127", "Data already exits in database"),
-	INTERNAL_SERVER_ERROR("127", "Internal Server Error");
+	INTERNAL_SERVER_ERROR("127", "Internal Server Error"),UPDATE_FAILED("128", " Failed to update");
 
 	private final String code;
 	private final String message;

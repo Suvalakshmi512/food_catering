@@ -9,4 +9,6 @@ public interface MenuService {
 	public MenuDTO getMenuByCode(String code, String authCode);
 
 	public void addMenu(MenuDTO menuDTO, String authCode);
+	
+	public void updatePrice(int id, String authcode);
 }

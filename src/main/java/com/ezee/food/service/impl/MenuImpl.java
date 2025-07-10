@@ -46,20 +46,21 @@ public class MenuImpl implements MenuService {
 
 	@Override
 	public List<MenuDTO> getAllMenu(String authCode) {
-		List<MenuDTO> allMenu =new ArrayList<MenuDTO>();
+		List<MenuDTO> allMenu = new ArrayList<MenuDTO>();
 		try {
-		authService.validateAuthCode(authCode);
-		allMenu = menuDAO.getAllMenu();
+			authService.validateAuthCode(authCode);
+			allMenu = menuDAO.getAllMenu();
 
-		for (MenuDTO menu : allMenu) {
-			for (DishListDTO dishList : menu.getDishListDTO()) {
-				DishDTO dishDTO = dishCache.getDishFromCache(dishList.getDishDTO());
-				DishDTO enrichedDish = dish.enrichDishDetails(dishDTO);
-
-				dishList.setDishDTO(enrichedDish);
+			for (MenuDTO menu : allMenu) {
+				for (DishListDTO dishList : menu.getDishListDTO()) {
+					DishDTO dishDTO = dishCache.getDishFromCache(dishList.getDishDTO());
+					DishDTO enrichedDish = dish.enrichDishDetails(dishDTO);
+					dishList.setDishDTO(enrichedDish);
+				}
 			}
-		}
-		}catch (Exception e) {
+		} catch (ServiceException e) {
+			throw e;
+		} catch (Exception e) {
 			LOGGER.error("Error while getting all menus: {}", e.getMessage(), e);
 			throw new ServiceException(ErrorCode.INTERNAL_SERVER_ERROR, "Unexpected error while fetching menus");
 		}
@@ -71,20 +72,22 @@ public class MenuImpl implements MenuService {
 	public MenuDTO getMenuByCode(String code, String authCode) {
 		MenuDTO menu = new MenuDTO();
 		try {
-		authService.validateAuthCode(authCode);
-		MenuDTO menuDTO = new MenuDTO();
-		menuDTO.setCode(code);
-		menu = menuDAO.getMenu(menuDTO);
-		if (menu.getDishListDTO() == null) {
-			throw new ServiceException("DishList is null");
-		}
-		for (DishListDTO dishList : menu.getDishListDTO()) {
-			DishDTO dishDTO = dishCache.getDishFromCache(dishList.getDishDTO());
-			DishDTO enrichedDish = dish.enrichDishDetails(dishDTO);
+			authService.validateAuthCode(authCode);
+			MenuDTO menuDTO = new MenuDTO();
+			menuDTO.setCode(code);
+			menu = menuDAO.getMenu(menuDTO);
+			if (menu.getDishListDTO() == null) {
+				throw new ServiceException("DishList is null");
+			}
+			for (DishListDTO dishList : menu.getDishListDTO()) {
+				DishDTO dishDTO = dishCache.getDishFromCache(dishList.getDishDTO());
+				DishDTO enrichedDish = dish.enrichDishDetails(dishDTO);
 
-			dishList.setDishDTO(enrichedDish);
-		}
-		}catch (Exception e) {
+				dishList.setDishDTO(enrichedDish);
+			}
+		} catch (ServiceException e) {
+			throw e;
+		} catch (Exception e) {
 			LOGGER.error("Error while getting menu: {}", e.getMessage(), e);
 			throw new ServiceException(ErrorCode.INTERNAL_SERVER_ERROR, "Unexpected error while fetching menu");
 		}
@@ -96,39 +99,50 @@ public class MenuImpl implements MenuService {
 		try {
 			@Cleanup
 			Connection connection = dataSource.getConnection();
-			connection.setAutoCommit(false);
+			try {
+				connection.setAutoCommit(false);
 
-			AuthResponseDTO validateAuthCode = authService.validateAuthCode(authCode);
-			menuDTO.setUpdatedby(validateAuthCode.getUsername());
-			menuDTO.setCode(CodeGenarator.generateCode("MNU", 12));
-			menuDAO.insertMenu(menuDTO, connection);
-			if (menuDTO.getId() == 0) {
-				throw new ServiceException("Menu insert failed.");
-			}
-
-			for (DishListDTO dishListDTO : menuDTO.getDishListDTO()) {
-				dishListDTO.setMenuDTO(menuDTO);
-				dishListDTO.setUpdatedby(validateAuthCode.getUsername());
-				dishListDTO.setCode(CodeGenarator.generateCode("DHLT", 11));
-				int dishList = dishListDAO.addDishList(dishListDTO, connection);
-				if (dishList == 0) {
-					throw new ServiceException("DishList insert failed.");
+				AuthResponseDTO validateAuthCode = authService.validateAuthCode(authCode);
+				menuDTO.setUpdatedby(validateAuthCode.getUsername());
+				menuDTO.setCode(CodeGenarator.generateCode("MNU", 12));
+				menuDAO.insertMenu(menuDTO, connection);
+				if (menuDTO.getId() == 0) {
+					throw new ServiceException("Menu insert failed.");
 				}
+
+				for (DishListDTO dishListDTO : menuDTO.getDishListDTO()) {
+					dishListDTO.setMenuDTO(menuDTO);
+					dishListDTO.setUpdatedby(validateAuthCode.getUsername());
+					dishListDTO.setCode(CodeGenarator.generateCode("DHLT", 11));
+					int dishList = dishListDAO.addDishList(dishListDTO, connection);
+					if (dishList == 0) {
+						throw new ServiceException("DishList insert failed.");
+					}
+				}
+
+			} catch (ServiceException e) {
+				throw e;
+			} finally {
+				connection.commit();
+				connection.setAutoCommit(true);
 			}
+		} catch (Exception e) {
+			throw new ServiceException("Error adding menu: " + e.getMessage(), e);
+		}
+	}
 
-			LOGGER.info("Before commit");
-			connection.commit();
-			LOGGER.info("After commit");
-
-			connection.setAutoCommit(true);
-
-			int totalUpdated = menuDAO.calculateAndUpdateMenuPrice(menuDTO.getId(), connection);
+	@Override
+	public void updatePrice(int id, String authcode) {
+		try {
+			int totalUpdated = menuDAO.calculateAndUpdateMenuPrice(id);
 			if (totalUpdated == 0) {
 				throw new ServiceException("Failed to update menu total price.");
 			}
-
+		} catch (ServiceException se) {
+			LOGGER.error("Service exception while updating menu: {}", se.getMessage(), se);
+			throw se;
 		} catch (Exception e) {
-			throw new ServiceException("Error adding menu: " + e.getMessage(), e);
+			throw new ServiceException("Error updating menu: " + e.getMessage(), e);
 		}
 	}
 

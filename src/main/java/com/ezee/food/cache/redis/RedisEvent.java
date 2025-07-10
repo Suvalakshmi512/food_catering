@@ -41,8 +41,10 @@ public class RedisEvent implements RedisEventService {
 				response = convertToDTO(cacheDTO);
 			}
 		}
-
+		if(response == null) {
 		response = eventDAO.getEvent(inputDTO);
+		}
+
 		if (response != null && response.getCode() != null) {
 			EventCacheDTO cacheDTO = convertToCacheDTO(response);
 			putEventCache(cacheKey, cacheDTO);

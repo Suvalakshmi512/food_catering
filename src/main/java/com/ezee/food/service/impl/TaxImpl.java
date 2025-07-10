@@ -20,21 +20,23 @@ import com.ezee.food.service.TaxService;
 import com.ezee.food.util.CodeGenarator;
 
 @Service
-public class TaxImpl implements TaxService{
+public class TaxImpl implements TaxService {
 	@Autowired
 	private AuthService authService;
 	@Autowired
 	private TaxDAO dao;
-	
-	private static final Logger LOGGER=LogManager.getLogger("com.ezee.food.impl");
+
+	private static final Logger LOGGER = LogManager.getLogger("com.ezee.food.impl");
 
 	@Override
 	public List<TaxDTO> getAllTax(String authCode) {
-		List<TaxDTO> list= new ArrayList<TaxDTO>();
+		List<TaxDTO> list = new ArrayList<TaxDTO>();
 		try {
-		authService.validateAuthCode(authCode);
-		list=dao.getAllTax();
-		}catch (Exception e) {
+			authService.validateAuthCode(authCode);
+			list = dao.getAllTax();
+		} catch (ServiceException e) {
+			throw e;
+		} catch (Exception e) {
 			LOGGER.error("Error while getting all Taxs: {}", e.getMessage(), e);
 			throw new ServiceException(ErrorCode.INTERNAL_SERVER_ERROR, "Unexpected error while fetching Taxs");
 		}
@@ -45,10 +47,12 @@ public class TaxImpl implements TaxService{
 	public TaxDTO getTaxByCode(String code, String authCode) {
 		TaxDTO tax = new TaxDTO();
 		try {
-		authService.validateAuthCode(authCode);
-		tax.setCode(code);
-		dao.getTax(tax);
-		}catch (Exception e) {
+			authService.validateAuthCode(authCode);
+			tax.setCode(code);
+			dao.getTax(tax);
+		} catch (ServiceException e) {
+			throw e;
+		} catch (Exception e) {
 			LOGGER.error("Error while getting Tax: {}", e.getMessage(), e);
 			throw new ServiceException(ErrorCode.INTERNAL_SERVER_ERROR, "Unexpected error while fetching Tax");
 		}
@@ -58,25 +62,27 @@ public class TaxImpl implements TaxService{
 	@Override
 	public void addTax(TaxDTO taxDTO, String authCode) {
 		try {
-		AuthResponseDTO validateAuthCode = authService.validateAuthCode(authCode);
-		taxDTO.setCode(CodeGenarator.generateCode("TAX", 12));
-		taxDTO.setUpdatedby(validateAuthCode.getUsername());
-		dao.addTax(taxDTO);
-	}catch (Exception e) {
-		LOGGER.error("Error while adding Tax: {}", e.getMessage(), e);
-		throw new ServiceException(ErrorCode.INTERNAL_SERVER_ERROR, "Unexpected error while inserting tax");
+			AuthResponseDTO validateAuthCode = authService.validateAuthCode(authCode);
+			taxDTO.setCode(CodeGenarator.generateCode("TAX", 12));
+			taxDTO.setUpdatedby(validateAuthCode.getUsername());
+			dao.addTax(taxDTO);
+		} catch (ServiceException e) {
+			throw e;
+		} catch (Exception e) {
+			LOGGER.error("Error while adding Tax: {}", e.getMessage(), e);
+			throw new ServiceException(ErrorCode.INTERNAL_SERVER_ERROR, "Unexpected error while inserting tax");
+		}
 	}
-	}
-	
+
 	@Override
 	public void update(Map<String, Object> tax, TaxDTO taxDTO, String authCode) {
 		AuthResponseDTO validateAuthCode = authService.validateAuthCode(authCode);
 		String code = taxDTO.getCode();
-		if(code == null) {
+		if (code == null) {
 			throw new ServiceException(ErrorCode.ID_OR_CODE_NOT_FOUND_EXCEPTION);
 		}
-		TaxDTO dto= dao.getTax(taxDTO);
-		if(dto.getId()==0) {
+		TaxDTO dto = dao.getTax(taxDTO);
+		if (dto.getId() == 0) {
 			throw new ServiceException(ErrorCode.ID_OR_CODE_NOT_FOUND_EXCEPTION);
 		}
 		try {
@@ -104,11 +110,11 @@ public class TaxImpl implements TaxService{
 			} else {
 				throw new ServiceException(ErrorCode.ID_OR_CODE_NOT_FOUND_EXCEPTION);
 			}
-			}catch (ServiceException e) {
-				throw e;
-			} catch (Exception e) {
-				LOGGER.error("Unexpected error: {}", e.getMessage(), e);
-				throw e;
-			}
+		} catch (ServiceException e) {
+			throw e;
+		} catch (Exception e) {
+			LOGGER.error("Unexpected error: {}", e.getMessage(), e);
+			throw e;
+		}
 	}
 }

@@ -56,14 +56,19 @@ public class DishImpl implements DishService {
 	public List<DishDTO> getAllDish(String authCode) {
 		List<DishDTO> allDish = new ArrayList<DishDTO>();
 		try {
-			authService.validateAuthCode(authCode);
-			allDish = dishDAO.getAllDish();
-			for (DishDTO dish : allDish) {
-				enrichDishDetails(dish);
+			AuthResponseDTO authDTO = authService.validateAuthCode(authCode);
+			if (authDTO != null) {
+				allDish = dishDAO.getAllDish();
+				for (DishDTO dish : allDish) {
+					enrichDishDetails(dish);
+				}
 			}
 
-		}  catch (Exception e) {
-			LOGGER.error("Error while getting all Dish: {}", e.getMessage(), e);
+		} catch (ServiceException se) {
+			LOGGER.error("Service exception while getting all Dish: {}", se.getMessage(), se);
+			throw se;
+		} catch (Exception e) {
+			LOGGER.error("Unexpected error while getting all Dish: {}", e.getMessage(), e);
 			throw new ServiceException(ErrorCode.INTERNAL_SERVER_ERROR, "Unexpected error while fetching Dish");
 		}
 		return allDish;
@@ -73,12 +78,15 @@ public class DishImpl implements DishService {
 	public DishDTO getDishByCode(String code, String authCode) {
 		DishDTO dish = new DishDTO();
 		try {
-		authService.validateAuthCode(authCode);
+			authService.validateAuthCode(authCode);
 
-		DishDTO dishDTO = new DishDTO();
-		dishDTO.setCode(code);
+			DishDTO dishDTO = new DishDTO();
+			dishDTO.setCode(code);
 
-		dish = dishDAO.getDish(dishDTO);
+			dish = dishDAO.getDish(dishDTO);
+		} catch (ServiceException se) {
+			LOGGER.error("Service exception while getting Dish: {}", se.getMessage(), se);
+			throw se;
 		} catch (Exception e) {
 			LOGGER.error("Error while getting Dish: {}", e.getMessage(), e);
 			throw new ServiceException(ErrorCode.INTERNAL_SERVER_ERROR, "Unexpected error while fetching Dish");
@@ -90,10 +98,10 @@ public class DishImpl implements DishService {
 	@Override
 	public void addDish(DishDTO dishDTO, String authCode) {
 		try {
-			@Cleanup
-			Connection connection = dataSource.getConnection();
+		@Cleanup
+		Connection connection = dataSource.getConnection();
+		try {
 			connection.setAutoCommit(false);
-
 			AuthResponseDTO validateAuthCode = authService.validateAuthCode(authCode);
 			String username = validateAuthCode.getUsername();
 			dishDTO.setUpdatedby(username);
@@ -124,46 +132,60 @@ public class DishImpl implements DishService {
 					throw new ServiceException("dishLabour insert failed.");
 				}
 			}
+         	
 
-			LOGGER.info("Before commit");
+		} catch (ServiceException se) {
+			LOGGER.error("Service exception while adding dish: {}", se.getMessage(), se);
+			throw se;
+		} 
+		finally {
 			connection.commit();
-			LOGGER.info("After commit");
-
 			connection.setAutoCommit(true);
-
-			int calculateAndUpdateDishPrice = dishDAO.calculateAndUpdateDishPrice(dishDTO.getId(), connection);
-			if (calculateAndUpdateDishPrice == 0) {
-				throw new ServiceException("Failed to update dish price.");
-			}
-
-		} catch (Exception e) {
-			throw new ServiceException("Error adding dish: " + e.getMessage(), e);
+		}
+		}catch (Exception e) {
+			LOGGER.error("Unexpected error while adding dish: {}", e.getMessage(), e);
+			throw new ServiceException(ErrorCode.INTERNAL_SERVER_ERROR, "Unexpected error while adding dish");
 		}
 	}
 
 	@Override
 	public DishDTO enrichDishDetails(DishDTO dish) {
 		try {
-		if (dish.getTaxDTO().getId() == 0) {
-			throw new ServiceException("Tax ID is 0 for dish: " + dish.getCode());
-		}
+			if (dish.getTaxDTO().getId() == 0) {
+				throw new ServiceException("Tax ID is 0 for dish: " + dish.getCode());
+			}
 
-		TaxDTO fullTaxDTO = taxCache.getTaxFromCache(dish.getTaxDTO());
-		dish.setTaxDTO(fullTaxDTO);
+			TaxDTO fullTaxDTO = taxCache.getTaxFromCache(dish.getTaxDTO());
+			dish.setTaxDTO(fullTaxDTO);
 
-		for (DishIngredientDTO ing : dish.getDishIngredientList()) {
-			IngredientDTO fullIng = ingredient.getIngredientFromCache(ing.getIngredientDTO());
-			ing.setIngredientDTO(fullIng);
-		}
+			for (DishIngredientDTO ing : dish.getDishIngredientList()) {
+				IngredientDTO fullIng = ingredient.getIngredientFromCache(ing.getIngredientDTO());
+				ing.setIngredientDTO(fullIng);
+			}
 
-		for (DishLabourDTO lab : dish.getDishLabourList()) {
-			LabourDTO fullLabour = labour.getLabourFromCache(lab.getLabourDTO());
-			lab.setLabourDTO(fullLabour);
-		}
-		}catch (Exception e) {
+			for (DishLabourDTO lab : dish.getDishLabourList()) {
+				LabourDTO fullLabour = labour.getLabourFromCache(lab.getLabourDTO());
+				lab.setLabourDTO(fullLabour);
+			}
+		} catch (Exception e) {
 			throw new ServiceException("Error adding dish: " + e.getMessage(), e);
 		}
 
 		return dish;
+	}
+	@Override
+	public void updatePrice(int id, String authcode) {
+		try {
+		int totalUpdated = dishDAO.calculateAndUpdateDishPrice(id);
+		if (totalUpdated == 0) {
+			throw new ServiceException("Failed to update Dish total price.");
+		}
+		} catch (ServiceException se) {
+			LOGGER.error("Service exception while updating dish: {}", se.getMessage(), se);
+			throw se;
+		} catch (Exception e) {
+			throw new ServiceException("Error updating dish: " + e.getMessage(), e);
+		}
+		
 	}
 }
